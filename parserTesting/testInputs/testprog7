@@ -1,6 +1,6 @@
 $r = 50;
 	@flag = 'true';
-	if (@flag -eq 'true' ) {
+	if (@flag -e 'true' ) {
 		$y_1 = 5;
 		@flag = 'hello';
 	#Missing right brace

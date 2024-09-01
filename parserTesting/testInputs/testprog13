@@ -3,7 +3,7 @@
 	$x = 6;
 	$y = +8;
 	@flag = 'true';
-	if (@flag -eq 'true') {
+	if (@flag -e 'true') {
 		$y_1 = -5;
 		@flag = 'hello' . $y_1 * 4;
 	}

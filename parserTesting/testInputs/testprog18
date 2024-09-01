@@ -1,7 +1,7 @@
 #Clean program with nested if statements
 	$r = 50;
 	@flag = 'true';
-	if (@flag -lt 'true' ) {
+	if (@flag -l 'true' ) {
 		$y_1 = 5;
 		if($y_1 > 4)
 		{

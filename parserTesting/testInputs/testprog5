@@ -1,7 +1,7 @@
 $r = 50;
 	@flag = 'true';
 	#Missing right parenthesis in if-condition
-	if (@flag -eq 'true' {
+	if (@flag -e 'true' {
 		$y_1 = 5;
 		@flag = 'hello';
 	}

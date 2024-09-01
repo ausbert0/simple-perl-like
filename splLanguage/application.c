@@ -25,48 +25,55 @@ int main(int argc, char *argv[])
             printf("Too many arguments\n");
             return 1;           
     }
+
+    // parser test
+    struct ParseTree *yeet = Prog(file, &lineNumber);
+    if (yeet)
+        return 1;
+    return 0;
     
-    // lexical analyzer test loop
-    struct tokMap tokenMap[] = 
-    {
-        {WRITELN, "WRITELN"},
-        {IF, "IF"},
-        {ELSE, "ELSE"},
-        {IDENT, "IDENT"},
-        {NIDENT, "NIDENT"},
-        {SIDENT, "SIDENT"},
-        {ICONST, "ICONST"},
-        {RCONST, "RCONST"},
-        {SCONST, "SCONST"},
-        {PLUS, "PLUS"},
-        {MINUS, "MINUS"},
-        {MULT, "MULT"},  
-        {DIV, "DIV"},
-        {EXPONENT, "EXPONENT"},
-        {ASSOP, "ASSOP"},
-        {NEQ, "NEQ"},
-        {NGTHAN, "NGTHAN"},
-        {NLTHAN, "NLTHAN"},
-        {CAT, "CAT"},
-        {SREPEAT, "SREPEAT"},
-        {SEQ, "SEQ"},
-        {SLTHAN, "SLTHAN"},
-        {SGTHAN, "SGTHAN"},
-        {COMMA, "COMMA"},
-        {SEMICOL, "SEMICOL"},
-        {LPAREN, "LPAREN"},
-        {RPAREN, "RPAREN"},
-        {LBRACES, "LBRACES"},
-        {RBRACES, "RBRACES"},
-        {ERR, "ERR"},
-        {DONE, "DONE"}	
-    };
+    // // lexical analyzer test loop
+    // struct tokMap tokenMap[] = 
+    // {
+    //     {WRITELN, "WRITELN"},
+    //     {IF, "IF"},
+    //     {ELSE, "ELSE"},
+    //     {IDENT, "IDENT"},
+    //     {NIDENT, "NIDENT"},
+    //     {SIDENT, "SIDENT"},
+    //     {ICONST, "ICONST"},
+    //     {RCONST, "RCONST"},
+    //     {SCONST, "SCONST"},
+    //     {PLUS, "PLUS"},
+    //     {MINUS, "MINUS"},
+    //     {MULT, "MULT"},  
+    //     {DIV, "DIV"},
+    //     {EXPONENT, "EXPONENT"},
+    //     {ASSOP, "ASSOP"},
+    //     {NEQ, "NEQ"},
+    //     {NGTHAN, "NGTHAN"},
+    //     {NLTHAN, "NLTHAN"},
+    //     {CAT, "CAT"},
+    //     {SREPEAT, "SREPEAT"},
+    //     {SEQ, "SEQ"},
+    //     {SLTHAN, "SLTHAN"},
+    //     {SGTHAN, "SGTHAN"},
+    //     {COMMA, "COMMA"},
+    //     {SEMICOL, "SEMICOL"},
+    //     {LPAREN, "LPAREN"},
+    //     {RPAREN, "RPAREN"},
+    //     {LBRACES, "LBRACES"},
+    //     {RBRACES, "RBRACES"},
+    //     {ERR, "ERR"},
+    //     {DONE, "DONE"}	
+    // };
     
-    struct LexItem *lex;
-    while ((lex = getNextToken(file, &lineNumber)) && lex->token != ERR && lex->token != DONE)
-    {
-        printf("%s(%s) %d\n", tokenMap[lex->token].s, lex->lexeme, lex->line);
-    }
-    printf("----------------------------------------\n");
-    return 1;
+    // struct LexItem *lex;
+    // while ((lex = getNextToken(file, &lineNumber)) && lex->token != ERR && lex->token != DONE)
+    // {
+    //     printf("%s(%s) %d\n", tokenMap[lex->token].s, lex->lexeme, lex->line);
+    // }
+    // printf("----------------------------------------\n");
+    // return 1;
+
 }

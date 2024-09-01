@@ -1,9 +1,11 @@
 #ifndef PARSE_H_
 #define PARSE_H_
-#include <stdio.h>
 
-//TOKEN is for handling extra  
-enum StmtType{IFSTMT, ASSIGNSTMT, WRITELNSTMT, TOKEN, INVALID};
+// EXCEPTION is for handling extra
+enum StmtType
+{
+    IFSTMT, ASSIGNSTMT, WRITELNSTMT, EXCEPTION, INVALID
+};
 
 //All abstract syntax structs
 struct ParseTree
@@ -14,12 +16,13 @@ struct ParseTree
 struct ParseStmtList
 {
     struct ParseStmt **stmtArr;
+    short unsigned int length;
 };
 
 struct ParseIfStmt
 {
     struct ParseExpr *conditon;
-    struct ParseStmtList *ifClause, *optionalElse;
+    struct ParseStmtList *ifClause, *elseClause;
 };
 
 struct ParseAssignStmt
@@ -35,54 +38,57 @@ struct ParseWriteLnStmt
 
 struct ParseStmt
 {
-    enum StmtType type;
     union
     {
         struct ParseIfStmt *ifStmt;
         struct ParseAssignStmt *assignStmt;
         struct ParseWriteLnStmt *writeLnStmt;
     };
+    enum StmtType type; 
 };
 
 struct ParseVar
 {
-    short int initialized;
-    struct LexItem var;
+    struct LexItem *variable;
 };
 
 struct ParseExprList
 {
     struct ParseExpr **exprList;
+    short unsigned int length;
 };
 
 struct ParseExpr
 {
-    struct ParseRelExpr *operand, *operand2;
+    struct ParseRelExpr *left, *right;
     enum Token operator;
 };
 
 struct ParseRelExpr
 {
-    struct ParseAddExpr *operand, *operand2;
+    struct ParseAddExpr *left, *right;
     enum Token operator;
 };
 
 struct ParseAddExpr
 {
-    struct ParseMultExpr **operandList;
-    enum Token *operatorList;
+    struct ParseMultExpr *left;
+    struct ParseAddExpr *right;
+    enum Token operator;
 };
 
 struct ParseMultExpr
 {
-    struct ParseExponExpr **operandList;
-    enum Token *operatorList;
+    struct ParseExponExpr *left;
+    struct ParseMultExpr *right;
+    enum Token operator;
 };
 
 struct ParseExponExpr
 {
-    struct ParseUnaryExpr **operandList;
-    enum Token *operatorList;
+    struct ParseUnaryExpr *left;
+    struct ParseExponExpr *right;
+    enum Token operator;
 };
 
 struct ParseUnaryExpr
@@ -95,7 +101,7 @@ struct ParsePrimaryExpr
 {
     union
     {
-        struct LexItem ident;
+        struct LexItem *ident;
         struct ParseExpr *expr;
         int integer;
         double real;

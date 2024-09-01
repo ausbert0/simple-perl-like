@@ -4,14 +4,14 @@
 #include <string.h>
 
 unsigned short int error_count = 0, pushed_back = 0;
-size_t varIndex = 0;
 struct LexItem *pushed_token = NULL;
-struct ParseVar variables[10]; //figure out whether to malloc/calloc
+
+size_t varIndex = 0;
 
 void ParseError(int* line, char* msg)
 {
     ++error_count;
-    printf("Parser Error %d. Line # %d: %s\n", error_count, *line, msg);
+    printf("Parser Error %d) Line # %d: %s\n", error_count, *line, msg);
 }
 
 int ErrCount()
@@ -40,7 +40,7 @@ void PushBackToken(struct LexItem *lex)
 //Program is: Prog ::= StmtList
 struct ParseTree *Prog(FILE* input, int* line)
 {
-    struct ParseTree *parser;
+    struct ParseTree *parser = malloc(sizeof(struct ParseTree *));
     struct ParseStmtList *stmtList = StmtList(input, line);
     if (stmtList && (GetNextToken(input, line))->token == DONE)
     {
@@ -49,102 +49,105 @@ struct ParseTree *Prog(FILE* input, int* line)
         return parser;
     }
     ParseError(line, "Missing Program");
-    return 0;
+    return NULL;
 }
 
 //StmtList ::= Stmt;{Stmt;}
 struct ParseStmtList *StmtList(FILE* input, int* line)
 {
-    struct ParseStmt *stmt, *stmtArr[30];
-    size_t index = 0;
-    struct ParseStmtList *stmtList; 
-    struct LexItem *lex;
-    while ((stmt = Stmt(input, line))->type != INVALID)
+    struct ParseStmt *stmt = NULL;
+    struct ParseStmt **stmtArr = malloc(sizeof(struct ParseStmt *) * 64); // 64 stmts
+    short unsigned int index = 0;
+    struct ParseStmtList *stmtList = malloc(sizeof(struct ParseStmtList *)); 
+    struct LexItem *lex = NULL;
+    while ((stmt = Stmt(input, line)))
     {
-        if (stmt != NULL)
+        if (index == 64) // stop when max number of statements is hit
+        {
+            ParseError(line, "Statement limit reached");
+            return stmtList;
+        }
+        stmtArr[index] = NULL;
+        if (stmt->type != EXCEPTION)
             stmtArr[index++] = stmt;
         lex = GetNextToken(input, line);
         if (lex->token == RBRACES || lex->token == DONE)
         {
-            stmtArr[index] = NULL;
             PushBackToken(lex);
-            *stmtList = (struct ParseStmtList) {0};
+            *stmtList = (struct ParseStmtList) {stmtArr, index};
             return stmtList;
         }
         if (lex->token == ELSE)
         {
             ParseError(line, "Missing right brace");
-            *stmtList = (struct ParseStmtList) {0, stmtArr};
-            return stmtList;
+            return NULL;
         }
         if (lex->token != SEMICOL)
         {
             ParseError(line, "Missing semicolon at end of statement");
-            *stmtList = (struct ParseStmtList) {0, stmtArr};
-            return stmtList;         
+            return NULL;         
         }
     }
     stmtArr[index] = NULL;
     ParseError(line, "Syntactic error in program body");
-    *stmtList = (struct ParseStmtList) {0, stmtArr};
-    return stmtList;
+    return NULL;
 }
 
 //Stmt ::= AssignStmt | WriteLnStmt | IfStmt
 struct ParseStmt *Stmt(FILE* input, int* line)
 {
-    struct ParseStmt temp, *stmt = &temp; 
+    struct ParseStmt *stmt = malloc(sizeof(struct ParseStmt *)); 
     struct LexItem* lex = GetNextToken(input, line);
     switch (lex->token)
     {
         case IF:
         {
             struct ParseIfStmt *ifStmt = IfStmt(input, line);
-            stmt->ifStmt = ifStmt;
-            if (!ifStmt->status)
+            if (!ifStmt)
             {
-                ParseError(line, "Incorrect If-Statement");
-                stmt->type = INVALID;
-                return stmt;
+                ParseError(line, "Incorrect if-statement");
+                return NULL;
             }
             stmt->type = IFSTMT;
+            stmt->ifStmt = ifStmt;
             return stmt;
         }
         case NIDENT: case SIDENT:
         {
             PushBackToken(lex);
             struct ParseAssignStmt *assignStmt = AssignStmt(input, line);
-            stmt->assignStmt = assignStmt;
-            if (!assignStmt->status)
+            if (!assignStmt)
             {
-                ParseError(line, "Incorrect Assignment Statement");
-                stmt->type = INVALID;
-                return stmt;
+                ParseError(line, "Incorrect assignment statement");
+                return NULL;
             }
             stmt->type = ASSIGNSTMT;
+            stmt->assignStmt = assignStmt;
             return stmt;
         }
         case WRITELN:
         {
             struct ParseWriteLnStmt *writeLnStmt = WriteLnStmt(input, line);
-            stmt->writeLnStmt = writeLnStmt;
-            if (!writeLnStmt->status)
+            if (!writeLnStmt)
             {
                 ParseError(line, "Incorrect writeln Statement");
-                stmt->type = INVALID;
-                return stmt;
+                return NULL;
             }
+            stmt->writeLnStmt = writeLnStmt;
             stmt->type = WRITELNSTMT;
             return stmt;
         }
         case IDENT:
-            ParseError(line, "Invalid variable name/type");
-            *stmt = (struct ParseStmt) {INVALID, {NULL}};
-            break;
+            ParseError(line, "Unrecognized identifier");
+            return NULL;
+        // case ELSE:
+        //     PushBackToken(lex); 
+        //     stmt->type = EXCEPTION;
+        //     return stmt;   
         default:
-            PushBackToken(lex);
-            *stmt = (struct ParseStmt) {TOKEN, {NULL}};
-            return stmt;        
+            PushBackToken(lex); 
+            stmt->type = EXCEPTION;
+            return stmt; 
     }
     return stmt;
 }
@@ -152,375 +155,336 @@ struct ParseStmt *Stmt(FILE* input, int* line)
 //WritelnStmt ::= writeln (ExprList)
 struct ParseWriteLnStmt *WriteLnStmt(FILE* input, int* line)
 {
-    struct ParseWriteLnStmt temp, *writeStmt = &temp;
+    struct ParseWriteLnStmt *writeStmt = malloc(sizeof(struct ParseWriteLnStmt *));
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token != LPAREN)
     {
-       ParseError(line, "Missing left parenthesis for writeln statement");
-       *writeStmt = (struct ParseWriteLnStmt) {0, NULL};
-       return writeStmt; 
+       ParseError(line, "Missing left parenthesis of writeln statement");
+       return NULL; 
     }
     struct ParseExprList *exprList = ExprList(input, line);
-    if (!exprList->status)
+    if (!exprList)
     {
         ParseError(line, "Invalid expression list");
-        *writeStmt = (struct ParseWriteLnStmt) {0, exprList};
-        return writeStmt;
+        return NULL;
     }
     lex = GetNextToken(input, line);
     if (lex->token != RPAREN)
     {
-        ParseError(line, "Missing right parenthesis for writeln statement");
-        *writeStmt = (struct ParseWriteLnStmt) {0, exprList};
-        return writeStmt;
+        ParseError(line, "Missing right parenthesis of writeln statement");
+        return NULL;
     }
-    *writeStmt = (struct ParseWriteLnStmt) {1, exprList};
+    *writeStmt = (struct ParseWriteLnStmt) {exprList};
     return writeStmt;
+}
+
+//ExprList:= Expr {,Expr}
+struct ParseExprList *ExprList(FILE* input, int* line)
+{
+    struct ParseExpr **exprArr = malloc(sizeof(struct exprArr *) * 16);
+    size_t length = 0;
+    struct ParseExprList *exprList = malloc(sizeof(struct ParseExprList *));
+    struct LexItem* lex;
+
+    while ((exprArr[length++] = Expr(input, line)))
+    {
+        lex = GetNextToken(input, line);
+        if (lex->token != COMMA)
+        {
+            if (lex->token != RPAREN)
+            {
+                ParseError(line, "Missing comma in writeln expression list");
+                return NULL;
+            }
+            exprArr[length] = NULL;
+            PushBackToken(lex);
+            *exprList = (struct ParseExprList) {exprArr, length};
+            return exprList;
+        }
+    }
+    exprArr[length] = NULL;
+    ParseError(line, "Missing Expression");
+    return NULL;
 }
 
 //IfStmt ::= if (Expr) '{' StmtList '}' [ else '{' StmtList '}' ] 
 struct ParseIfStmt *IfStmt(FILE* input, int* line)
 {
-    struct ParseIfStmt temp, *IfStmt = &temp;
+    struct ParseIfStmt *IfStmt = malloc(sizeof(struct ParseIfStmt *));
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token != LPAREN)
     {
-        ParseError(line, "Missing left parenthesis for If-Statement");
-        *IfStmt = (struct ParseIfStmt) {0, NULL, NULL, NULL};
-        return IfStmt;
+        ParseError(line, "Missing left parenthesis of If-Statement");
+        return NULL;
     }
     struct ParseExpr *condition = Expr(input, line);
-    if (!condition->status)
+    if (!condition)
     {
         ParseError(line, "Invalid expression for evaluation in If-Statement");
-        *IfStmt = (struct ParseIfStmt) {0, condition, NULL, NULL};
-        return IfStmt;
+        return NULL;
     }
     lex = GetNextToken(input, line);
     if (lex->token != RPAREN)
     {
-        ParseError(line, "Missing right parenthesis for If-Statement");
-        *IfStmt = (struct ParseIfStmt) {0, condition, NULL, NULL};
-        return IfStmt;
+        ParseError(line, "Missing right parenthesis of If-Statement");
+        return NULL;
     }
     lex = GetNextToken(input, line);
     if (lex->token != LBRACES)
     {
         ParseError(line, "Missing left brace of If-Clause");
-        *IfStmt = (struct ParseIfStmt) {0, condition, NULL, NULL};
-        return IfStmt;
+        return NULL;
     }
     struct ParseStmtList *trueBody = StmtList(input, line);
-    if (!trueBody->status)
+    if (!trueBody)
     {
         ParseError(line, "Invalid statement list in If-Clause");
-        *IfStmt = (struct ParseIfStmt) {0, condition, trueBody, NULL};
-        return IfStmt;
+        return NULL;
     }
     lex = GetNextToken(input, line);
     if (lex->token != RBRACES)
     {
         ParseError(line, "Missing right brace of If-Clause");
-        *IfStmt = (struct ParseIfStmt) {0, condition, trueBody, NULL};
-        return IfStmt;
+        return NULL;
     }
     lex = GetNextToken(input, line);
     if (lex->token != ELSE)
     {
         PushBackToken(lex);
-        *IfStmt = (struct ParseIfStmt) {1, condition, trueBody, NULL};
+        *IfStmt = (struct ParseIfStmt) {condition, trueBody, NULL};
         return IfStmt;
     }
     lex = GetNextToken(input, line);
     if (lex->token != LBRACES)
     {
         ParseError(line, "Missing left brace of Else-Clause");
-        *IfStmt = (struct ParseIfStmt) {0, condition, trueBody, NULL};
-        return IfStmt;
+        return NULL;
     }
     struct ParseStmtList *falseBody = StmtList(input, line);
-    if (!falseBody->status)
+    if (!falseBody)
     {
         ParseError(line, "Invalid statement list for Else-Clause");
-        *IfStmt = (struct ParseIfStmt) {0, condition, trueBody, falseBody};
-        return IfStmt;
+        return NULL;
     }
     lex = GetNextToken(input, line);
     if (lex->token != RBRACES)
     {
         ParseError(line, "Missing right brace of Else-Clause");
-        *IfStmt = (struct ParseIfStmt) {0, condition, trueBody, falseBody};
-        return IfStmt;
+        return NULL;
     }
-    *IfStmt = (struct ParseIfStmt) {1, condition, trueBody, falseBody};
+    *IfStmt = (struct ParseIfStmt) {condition, trueBody, falseBody};
     return IfStmt;
 }
 
 //AssignStmt ::= Var = Expr
 struct ParseAssignStmt *AssignStmt(FILE* input, int* line)
 {
-    struct ParseAssignStmt temp, *assignStmt = &temp;
+    struct ParseAssignStmt *assignStmt = malloc(sizeof(struct AssignStmt *));
     struct ParseVar *var = Var(input, line);
-    if (!var->status)
+    if (!var)
     {
-        *assignStmt = (struct ParseAssignStmt) {0, var, NULL};
-        return assignStmt;
+        return NULL;
     }
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token != ASSOP)
     {
         ParseError(line, "Missing assignment operator");
-        *assignStmt = (struct ParseAssignStmt) {0, var, NULL};
-        return assignStmt;
+        return NULL;
     }
     struct ParseExpr *expr = Expr(input, line);
-    if (!expr->status)
+    if (!expr)
     {
-        *assignStmt = (struct ParseAssignStmt) {0, var, expr};
-        return assignStmt;
+        ParseError(line, "Missing expression in assignment statement");
+        return NULL;
     }
-    var->initialized = 1;
-    *assignStmt = (struct ParseAssignStmt) {1, var, expr};
+    ;
+    *assignStmt = (struct ParseAssignStmt) {var, expr};
     return assignStmt;
 }
 
 //Var ::= NIDENT | SIDENT
 struct ParseVar *Var(FILE* input, int* line)
 {
-    short int check = 0; //for determining if var is found in var table
-    struct LexItem* lex = GetNextToken(input, line);
-    struct ParseVar temp, *var = &temp;
-    //struct ParseVar *var = malloc(sizeof(struct ParseVar));
+    struct LexItem *lex = GetNextToken(input, line);
+    struct ParseVar *var = malloc(sizeof(struct ParseVar *));
     if (lex->token == NIDENT || lex->token == SIDENT)
     {
-        for (int i = 0; i < varIndex; i++)
-        {
-            if (strcmp(lex->lexeme, variables[i].var.lexeme) == 0)
-            {
-                if (variables[i].initialized == 0)
-                {
-                    ParseError(line, "Attempted to use uninitialized variable");
-                    *var = (struct ParseVar) {0, 0,*lex};
-                    return var;
-                }
-                check = 1;
-                break;
-            }
-        }
-        if (!check)
-        {
-            variables[varIndex++] = *var = (struct ParseVar) {1, 0, *lex};
-            // split up the struct into separate enum Token and lexeme
-            return var;
-        }
-        *var = (struct ParseVar) {1, 0,*lex};
+        *var = (struct ParseVar) {lex};
         return var;
     }
     ParseError(line, "Invalid variable name");
-    *var = (struct ParseVar) {0, 0,*lex};
-    return var;
+    return NULL;
 }
 
-//ExprList:= Expr {,Expr}
-struct ParseExprList *ExprList(FILE* input, int* line)
-{
-    struct ParseExpr *exprArr[10];
-    size_t arrIndex = 0;
-    struct ParseExprList temp, *exprList = &temp;
-    struct LexItem* lex;
-
-    while ((exprArr[arrIndex++] = Expr(input, line)))
-    {
-        lex = GetNextToken(input, line);
-        if (lex->token != COMMA)
-        {
-            exprArr[arrIndex] = NULL;
-            PushBackToken(lex);
-            *exprList = (struct ParseExprList) {1, exprArr};
-            return exprList;
-        }
-    }
-    exprArr[arrIndex] = NULL;
-    ParseError(line, "Missing Expression");
-    *exprList = (struct ParseExprList) {0, exprArr};
-    return 0;
-}
-
-//Expr ::= RelExpr [(-eq|==) RelExpr ]
+//Expr ::= RelExpr [(-eq|==) RelExpr]
 struct ParseExpr *Expr(FILE* input, int* line)
 {
-    struct ParseExpr temp, *expr = &temp;
     struct ParseRelExpr *relExpr1 = RelExpr(input, line), *relExpr2;
-    if (!relExpr1->status)
+
+    if (!relExpr1)
     {
-        *expr = (struct ParseExpr) {0, relExpr1, NULL, DONE};
-        return expr;
+        return NULL;
     }
+    
+    struct ParseExpr *expr = malloc(sizeof(struct ParseExpr *));
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token == NEQ || lex->token == SEQ)
     {
         relExpr2 = RelExpr(input, line);
-        if (!relExpr2->status)
+        if (!relExpr2)
         {
             ParseError(line, "Missing operand after operator");
-            *expr = (struct ParseExpr) {0, relExpr1, relExpr2, lex->token};
-            return expr;
+            return NULL;
         }
-        *expr = (struct ParseExpr) {1, relExpr1, relExpr2, lex->token};
+        *expr = (struct ParseExpr) {relExpr1, relExpr2, lex->token};
         return expr;
     }
     PushBackToken(lex);
-    *expr = (struct ParseExpr) {1, relExpr1, NULL, DONE};
+    *expr = (struct ParseExpr) {relExpr1, NULL, ERR};
     return expr;
 }
 
 //RelExpr ::= AddExpr [ ( -lt | -gt | < | > )  AddExpr ]
 struct ParseRelExpr *RelExpr(FILE* input, int* line)
 {
-    struct ParseRelExpr temp, *relExpr = &temp;
     struct ParseAddExpr *addExpr1 = AddExpr(input, line), *addExpr2;
-    if (!addExpr1->status)
+    if (!addExpr1)
     {
-        *relExpr = (struct ParseRelExpr) {0, addExpr1, NULL, ERR};
-        return relExpr;
+        return NULL;
     }
+    
+    struct ParseRelExpr *relExpr = malloc(sizeof(struct ParseRelExpr *));
     struct LexItem* lex = GetNextToken(input, line);
+    
     if (lex->token == NLTHAN || lex->token == NGTHAN 
     || lex->token == SLTHAN || lex->token == SGTHAN)
     {
         addExpr2 = AddExpr(input, line);
-        if (!addExpr2->status)
+        if (!addExpr2)
         {
             ParseError(line, "Missing operand after operator");
-            *relExpr = (struct ParseRelExpr) {0, addExpr1, addExpr2, lex->token};
-            return relExpr;
+            return NULL;
         }
-        *relExpr = (struct ParseRelExpr) {1, addExpr1, addExpr2, lex->token};
+        *relExpr = (struct ParseRelExpr) {addExpr1, addExpr2, lex->token};
         return relExpr;
     }
     PushBackToken(lex);
-    *relExpr = (struct ParseRelExpr) {1, addExpr1, NULL, DONE};
+    *relExpr = (struct ParseRelExpr) {addExpr1, NULL, ERR};
     return relExpr;
 }
 
 //AddExpr ::= MultExpr { ( + | - | .) MultExpr }
 struct ParseAddExpr *AddExpr(FILE* input, int* line)
 {
-    struct ParseAddExpr temp, *addExpr = &temp; //pointer to return
-    struct ParseMultExpr *multExprArr[10]; //array of MultExpr's
-    size_t multIndex = 0; //keeps track of highest index for multExprArr
-    enum Token tokArray[10];  //array of operators
-    size_t tokIndex = 0; //keeps track of highest index for tokArray
+    struct ParseMultExpr *multExpr = MultExpr(input, line); // current MultExpr
 
-    multExprArr[multIndex] = MultExpr(input, line);
-    if (!multExprArr[multIndex++]->status)
+    if (!multExpr)
     {
-        multExprArr[multIndex] = NULL;
-        *addExpr = (struct ParseAddExpr) {0, multExprArr, NULL};    
-        return addExpr;
+        return NULL;
     }
+    
+    struct ParseAddExpr *addExprAST = malloc(sizeof(struct ParseAddExpr *));
+    addExprAST->left = multExpr;
+    addExprAST->right = NULL; // accounts for no operator if none are found
+    
+    // to keep track of the current AddExpr
+    struct ParseAddExpr *addExpr = addExprAST;
+
     struct LexItem* lex = GetNextToken(input, line);
     while (lex->token == PLUS || lex->token == MINUS || lex->token == CAT)
     {
-        tokArray[tokIndex++] = lex->token;
-        multExprArr[multIndex] = MultExpr(input, line);
-        if (!multExprArr[multIndex++]->status)
+        addExpr->right = malloc(sizeof(struct ParseAddExpr *));
+        multExpr = MultExpr(input, line);
+        if (!multExpr)
         {
             ParseError(line, "Missing operand after operator");
-            tokArray[tokIndex] = DONE;
-            multExprArr[multIndex] = NULL;
-            *addExpr = (struct ParseAddExpr) {0, multExprArr, tokArray};
-            return addExpr;
+            return NULL;
         }
+        addExpr->operator = lex->token;
+        addExpr->left = multExpr;
+        addExpr = addExpr->right;
+        addExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
-    tokArray[tokIndex] = DONE;
-    multExprArr[multIndex] = NULL;
-    *addExpr = (struct ParseAddExpr) {1, multExprArr, tokArray};    
-    return addExpr;
+    return addExprAST;
 }
 
 //MultExpr ::= ExponExpr { ( * | / | **) ExponExpr }
 struct ParseMultExpr *MultExpr(FILE* input, int* line)
 {
-    struct ParseMultExpr temp, *multExpr = &temp; //pointer to return
-    struct ParseExponExpr *exponExprArr[10]; //array of ExponExpr's
-    size_t exponIndex = 0; //keeps track of highest index for exponExprArr
-    enum Token tokArray[10]; //array of operators
-    size_t tokIndex = 0; //keeps track of highest index for tokArray
-
-    exponExprArr[exponIndex] = ExponExpr(input, line);
-    if (!exponExprArr[exponIndex]->status)
-    {
-        exponExprArr[exponIndex] = NULL;
-        *multExpr = (struct ParseMultExpr) {0, exponExprArr, NULL};    
-        return multExpr;
+    struct ParseExponExpr *exponExpr = ExponExpr(input, line); // current exponExpr 
+    if (!exponExpr)
+    {  
+        return NULL;
     }
+    
+    struct ParseMultExpr *multExprAST = malloc(sizeof(struct ParseMultExpr *));
+    multExprAST->right = NULL;
+    multExprAST->left = exponExpr;
+    
+    // to keep track of the current MultExpr
+    struct ParseMultExpr *multExpr = multExprAST;
+
     struct LexItem* lex = GetNextToken(input, line);
     while (lex->token == MULT || lex->token == DIV || lex->token == SREPEAT)
     {
-        tokArray[tokIndex++] = lex->token;
-        exponExprArr[exponIndex] = ExponExpr(input, line);
-        if (!exponExprArr[exponIndex++]->status)
+        multExpr->right = malloc(sizeof(struct ParseMultExpr *));
+        exponExpr = ExponExpr(input, line);
+        if (!exponExpr)
         {
             ParseError(line, "Missing operand after operator");
-            tokArray[tokIndex] = DONE;
-            exponExprArr[exponIndex] = NULL;
-            *multExpr = (struct ParseMultExpr) {0, exponExprArr, tokArray};
-            return multExpr;
+            return NULL;
         }
+        multExpr->operator = lex->token;
+        multExpr->left = exponExpr;
+        multExpr = multExpr->right;
+        multExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
-    tokArray[tokIndex] = DONE;
-    exponExprArr[exponIndex] = NULL;
-    *multExpr = (struct ParseMultExpr) {1, exponExprArr, tokArray};    
-    return multExpr;
+    return multExprAST;
 }
 
 //ExponExpr ::= UnaryExpr { ^ UnaryExpr }
 struct ParseExponExpr *ExponExpr(FILE* input, int* line)
 {
-    struct ParseExponExpr temp, *exponExpr = &temp; //pointer to return
-    struct ParseUnaryExpr *unaryExprArr[10]; //array of unaryExpr's
-    size_t unaryIndex = 0; //keeps track of highest index for unaryExprArr
-    enum Token tokArray[10]; //array of operators
-    size_t tokIndex = 0; //keeps track of highest index for tokArray
-
-    unaryExprArr[unaryIndex] = UnaryExpr(input, line);
-    if (!unaryExprArr[unaryIndex]->status)
-    {
-        unaryExprArr[unaryIndex] = NULL;
-        *exponExpr = (struct ParseExponExpr) {0, unaryExprArr, NULL};    
-        return exponExpr;
+    struct ParseUnaryExpr *unaryExpr = UnaryExpr(input, line);
+    if (!unaryExpr)
+    {  
+        return NULL;
     }
+    
+    struct ParseExponExpr *exponExprAST = malloc(sizeof(struct ParseExponExpr *));
+    exponExprAST->right = NULL;
+    exponExprAST->left = unaryExpr;
+    
+    // to keep track of the current ExponExpr
+    struct ParseExponExpr *exponExpr = exponExprAST;
     struct LexItem* lex = GetNextToken(input, line);
     while (lex->token == EXPONENT)
     {
-        tokArray[tokIndex++] = lex->token;
-        unaryExprArr[unaryIndex] = UnaryExpr(input, line);
-        if (!unaryExprArr[unaryIndex++]->status)
+        exponExpr->right = malloc(sizeof(struct ParseExponExpr *));
+        unaryExpr = UnaryExpr(input, line);
+        if (!unaryExpr)
         {
             ParseError(line, "Missing operand after operator");
-            tokArray[tokIndex] = DONE;
-            unaryExprArr[unaryIndex] = NULL;
-            *exponExpr = (struct ParseExponExpr) {0, unaryExprArr, tokArray};
-            return exponExpr;
+            return NULL;
         }
+        exponExpr->operator = lex->token;
+        exponExpr->left = unaryExpr;
+        exponExpr = exponExpr->right;
+        exponExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
-    tokArray[tokIndex] = DONE;
-    unaryExprArr[unaryIndex] = NULL;
-    *exponExpr = (struct ParseExponExpr) {1, unaryExprArr, tokArray};
     return exponExpr;
 }
 
 //UnaryExpr ::= [( - | + )] PrimaryExpr
 struct ParseUnaryExpr *UnaryExpr(FILE* input, int* line)
 {
-    struct ParseUnaryExpr temp, *unaryExpr = &temp;
+    struct ParseUnaryExpr *unaryExpr = malloc(sizeof(struct ParseUnaryExpr *));
     int sign = 0;
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token == PLUS)
@@ -530,17 +494,20 @@ struct ParseUnaryExpr *UnaryExpr(FILE* input, int* line)
     else 
         PushBackToken(lex);
     struct ParsePrimaryExpr *primaryExpr = PrimaryExpr(input, line);
-    *unaryExpr = (struct ParseUnaryExpr) {primaryExpr->status, primaryExpr, sign};
+    if (!primaryExpr)
+    {
+        return NULL;
+    }
+    *unaryExpr = (struct ParseUnaryExpr) {primaryExpr, sign};
     return unaryExpr;
 }
 
 //PrimaryExpr ::= IDENT | NIDENT | SIDENT | ICONST | RCONST | SCONST | (Expr)
 struct ParsePrimaryExpr *PrimaryExpr(FILE* input, int* line)
 {
-    struct ParsePrimaryExpr temp, *primaryExpr = &temp;
-    primaryExpr->status = 1;
+    struct ParsePrimaryExpr *primaryExpr = malloc(sizeof(struct ParsePrimaryExpr *));
     struct ParseExpr *expr; 
-    struct LexItem* lex = GetNextToken(input, line);
+    struct LexItem *lex = GetNextToken(input, line);
     switch (lex->token)
     {
         case ICONST:
@@ -553,36 +520,24 @@ struct ParsePrimaryExpr *PrimaryExpr(FILE* input, int* line)
             primaryExpr->string = lex->lexeme;
             return primaryExpr;
         case IDENT: case NIDENT: case SIDENT:
-            for (int i = 0; i < varIndex; i++)
-            {
-                if (strcmp(lex->lexeme, variables[i].var.lexeme) == 0)
-                {
-                    if (variables[i].initialized == 0)
-                    {
-                        ParseError(line, "Attempted to use undefined variable");
-                        return 0;
-                    }
-                }
-            }
-            primaryExpr->ident = *lex;
+            primaryExpr->ident = lex;
             return primaryExpr;
         case LPAREN:
             expr = Expr(input, line);
-            primaryExpr->expr = expr;
             if(!expr)
             {
                 ParseError(line, "Missing expression after left parenthesis of expression");
-                return 0;
+                return NULL;
             }
             lex = GetNextToken(input, line);
             if (lex->token != RPAREN)
             {
                 ParseError(line, "Missing closing parenthesis of expression");
-                return 0;
+                return NULL;
             }
+            primaryExpr->expr = expr;
             return primaryExpr;
         default:
-            *primaryExpr = (struct ParsePrimaryExpr) {0};
-            return primaryExpr;
+            return NULL;
     }
 }

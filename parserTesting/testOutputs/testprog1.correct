@@ -6,3 +6,5 @@
 6. Line # 5: Missing Program
 Unsuccessful Parsing
 Number of Syntax Errors 6
+
+no longer checking undefined variables, result should be (DONE)

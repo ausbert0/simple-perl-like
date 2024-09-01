@@ -1,7 +1,7 @@
 $r = 50;
 	@flag = 'true';
 	#Missing left brace in if statement clause
-	if (@flag -eq 'true' )
+	if (@flag -e 'true' )
 		$y_1 = 5;
 		@flag = 'hello';
 	}

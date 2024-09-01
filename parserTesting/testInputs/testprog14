@@ -2,7 +2,7 @@
 	$x = 6;
 	$y = +8;
 	@flag = 'true';
-	if (@flag -eq 'true') {
+	if (@flag -e 'true') {
 		$y_1 = -5;
 		@flag = 'hello' . $y_1 * 4;
 	}
@@ -10,6 +10,6 @@
 		$y_1 = -(7.5);
 		@flag = 'goodbye';
 	};
-	$res = ($r * ($y +  $x) / $y - $x;
+	$res = ($r * ($y +  $x) / $y - $x; # missing closing parenthesis
 	writeln ('Value = ', $r ^ (3 * 2) ^ $x, '$y_1 = ', @flag);
 	$r = $r + @flag;
