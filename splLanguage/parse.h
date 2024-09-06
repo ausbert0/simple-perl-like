@@ -1,10 +1,16 @@
 #ifndef PARSE_H_
 #define PARSE_H_
+#include "lex.h"
 
 // EXCEPTION is for handling extra
 enum StmtType
 {
     IFSTMT, ASSIGNSTMT, WRITELNSTMT, EXCEPTION, INVALID
+};
+
+enum ValType
+{
+    NVAR, SVAR, ID, EXPRESSION, INTEGER, REAL, STRING 
 };
 
 //All abstract syntax structs
@@ -21,7 +27,7 @@ struct ParseStmtList
 
 struct ParseIfStmt
 {
-    struct ParseExpr *conditon;
+    struct ParseExpr *condition;
     struct ParseStmtList *ifClause, *elseClause;
 };
 
@@ -54,7 +60,7 @@ struct ParseVar
 
 struct ParseExprList
 {
-    struct ParseExpr **exprList;
+    struct ParseExpr **expr;
     short unsigned int length;
 };
 
@@ -101,12 +107,13 @@ struct ParsePrimaryExpr
 {
     union
     {
-        struct LexItem *ident;
+        struct LexItem *ident; // NVAR, SVAR, ID
         struct ParseExpr *expr;
         int integer;
         double real;
         char* string;
     };
+    enum ValType type;
 };
 
 //All functions for parsing

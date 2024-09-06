@@ -512,15 +512,27 @@ struct ParsePrimaryExpr *PrimaryExpr(FILE* input, int* line)
     {
         case ICONST:
             primaryExpr->integer = atoi(lex->lexeme);
+            primaryExpr->type = INTEGER;
             return primaryExpr;
         case RCONST:
             primaryExpr->real = atof(lex->lexeme);
+            primaryExpr->type = REAL;
             return primaryExpr;
         case SCONST:
             primaryExpr->string = lex->lexeme;
+            primaryExpr->type = STRING;
             return primaryExpr;
-        case IDENT: case NIDENT: case SIDENT:
+        case IDENT: 
             primaryExpr->ident = lex;
+            primaryExpr->type = ID;
+            return primaryExpr;        
+        case NIDENT: 
+            primaryExpr->ident = lex;
+            primaryExpr->type = NVAR;
+            return primaryExpr;
+        case SIDENT:
+            primaryExpr->ident = lex;
+            primaryExpr->type = SVAR;
             return primaryExpr;
         case LPAREN:
             expr = Expr(input, line);
@@ -536,6 +548,7 @@ struct ParsePrimaryExpr *PrimaryExpr(FILE* input, int* line)
                 return NULL;
             }
             primaryExpr->expr = expr;
+            primaryExpr->type = EXPRESSION;
             return primaryExpr;
         default:
             return NULL;
