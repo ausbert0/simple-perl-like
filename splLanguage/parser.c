@@ -309,7 +309,7 @@ struct ParseVar *Var(FILE* input, int* line)
     struct ParseVar *var = malloc(sizeof(struct ParseVar *));
     if (lex->token == NIDENT || lex->token == SIDENT)
     {
-        *var = (struct ParseVar) {lex};
+        *var = (struct ParseVar) {lex->lexeme};
         return var;
     }
     ParseError(line, "Invalid variable name");
@@ -478,14 +478,14 @@ struct ParseExponExpr *ExponExpr(FILE* input, int* line)
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
-    return exponExpr;
+    return exponExprAST;
 }
 
 //UnaryExpr ::= [( - | + )] PrimaryExpr
 struct ParseUnaryExpr *UnaryExpr(FILE* input, int* line)
 {
     struct ParseUnaryExpr *unaryExpr = malloc(sizeof(struct ParseUnaryExpr *));
-    int sign = 0;
+    int sign = 0; // no sign, to handle if strings have a +- before them (invalid case)
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token == PLUS)
         sign = 1;
@@ -523,15 +523,15 @@ struct ParsePrimaryExpr *PrimaryExpr(FILE* input, int* line)
             primaryExpr->type = STRING;
             return primaryExpr;
         case IDENT: 
-            primaryExpr->ident = lex;
+            primaryExpr->ident = lex->lexeme;
             primaryExpr->type = ID;
             return primaryExpr;        
         case NIDENT: 
-            primaryExpr->ident = lex;
+            primaryExpr->ident = lex->lexeme;
             primaryExpr->type = NVAR;
             return primaryExpr;
         case SIDENT:
-            primaryExpr->ident = lex;
+            primaryExpr->ident = lex->lexeme;
             primaryExpr->type = SVAR;
             return primaryExpr;
         case LPAREN:

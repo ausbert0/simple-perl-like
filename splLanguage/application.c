@@ -1,5 +1,6 @@
 #include "lex.h"
 #include "parse.h"
+#include "interpreter.h"
 
 struct LexItem* getNextToken(FILE*, int*);
 
@@ -28,11 +29,16 @@ int main(int argc, char *argv[])
 
     // parser test
     struct ParseTree *yeet = Prog(file, &lineNumber);
-    if (yeet)
+    if (!yeet)
+        return 0;
+
+    // interpreter test
+    if(Interpret(yeet))
         return 1;
     return 0;
+
     
-    // // lexical analyzer test loop
+    // lexical analyzer test loop
     // struct tokMap tokenMap[] = 
     // {
     //     {WRITELN, "WRITELN"},

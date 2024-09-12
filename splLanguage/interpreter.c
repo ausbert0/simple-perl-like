@@ -3,8 +3,11 @@
 #include "operators.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-unsigned short int interpret(struct ParseTree *parseTree) {
+struct VariableList *head = NULL, *tail = NULL, *current = NULL;
+
+unsigned short int Interpret(struct ParseTree *parseTree) {
     if (parseTree) {
         if (evaluateStmtList(parseTree->stmtList)) {
             printf("Successfully ran!\n"); 
@@ -26,7 +29,7 @@ unsigned short int evaluateStmtList(struct ParseStmtList *stmtList) {
     for (int i = 0; i < stmtList->length; i++) {
         if ((evaluateStmt(stmtList->stmtArr[i]))) {
             printf("Statement %d successfully interpreted!\n", i+1);
-            printf("-------------------------------------");
+            printf("-------------------------------------\n");
         }
         else 
         {
@@ -52,13 +55,12 @@ unsigned short int evaluateStmt(struct ParseStmt *stmt) {
     return 0;
 }
 
-
 unsigned short int evaluateIfStmt(struct ParseIfStmt *ifStmt) {
     struct Value *expr = evaluateExpr(ifStmt->condition);
     if (!expr) {return 0;}
     
     if (expr->type != VBOOL) {
-        InterpreterError("Non-conditional expression in if-statement");
+        printf("Runtime Error: Non-conditional expression in if-statement");
         return 0;
     }
 
@@ -68,8 +70,58 @@ unsigned short int evaluateIfStmt(struct ParseIfStmt *ifStmt) {
     return evaluateStmtList(ifStmt->elseClause);
 }
 
-unsigned short int evaluateAssignStmt(struct ParseAssignStmt *);
+unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
+    // struct Value *varE = evaluateVar(assign->var);
+    // if (!varE) {return 0;}
 
+    struct Value *expression = evaluateExpr(assign->expr);
+
+    struct VariableList *variable = malloc(sizeof(struct VariableList *));
+    *variable = (struct VariableList) {NULL, assign->var->variable, expression};
+
+    if (!head) {
+        head = variable;
+        current = head;
+        // head->next = malloc(sizeof(struct VariableList *));
+        return 1;
+    }
+
+    if (!head->next) {
+        head->next = variable;
+        current = variable;
+        // tail = current->next;
+        return 1;
+    }
+
+    current->next = variable;
+    current = current->next;
+
+    // current = variable;
+    // current->next = tail;
+    // tail = tail->next;
+
+    if (!expression) {return 0;}
+
+    if (expression->type == VSTRING && (assign->var->variable[0] == '$')) {
+        printf("Runtime Error: Attempted to assign string (%s) to numeric variable (%s)\n"
+        , expression->string, assign->var->variable);
+        return 0;
+    }
+
+    else if ((expression->type == VREAL || expression->type == VINT) && (assign->var->variable[0] == '@')) {
+        printf("Runtime Error: Attempted to assign number (%s) to string variable (%s)\n"
+        , expression->string, assign->var->variable);
+        return 0;
+    }
+
+    else if (expression->type == VBOOL) {
+        printf("Runtime Error: Attempted to assign boolean value to variable (%s)\n"
+        , expression->string);
+        return 0;
+    }
+
+    return 1;
+}
 
 unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *writeLn) {
     struct Value **exprList = evaluateExprList(writeLn->exprList);
@@ -77,6 +129,8 @@ unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *writeLn) {
         return 0;
     }
     
+    printf("\n_______________________________________________\n\n");
+
     short unsigned int length = writeLn->exprList->length;
     for (int i = 0; i < length; i++) {
         switch (exprList[i]->type){
@@ -86,9 +140,9 @@ unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *writeLn) {
             default: return 0;
         }
     }
+    printf("\n_______________________________________________\n\n");
     return 1;
 }
-
 
 struct Value **evaluateExprList(struct ParseExprList *exprList)
 {
@@ -102,7 +156,6 @@ struct Value **evaluateExprList(struct ParseExprList *exprList)
     }
     return values;
 }
-
 
 struct Value *evaluateExpr(struct ParseExpr *expr) {
     struct Value *left = evaluateRelExpr(expr->left);
@@ -125,8 +178,6 @@ struct Value *evaluateExpr(struct ParseExpr *expr) {
         default: return NULL;
     }
 }
-
-
 
 struct Value *evaluateRelExpr(struct ParseRelExpr *relExpr) {
     struct Value *left = evaluateAddExpr(relExpr->left);
@@ -175,8 +226,6 @@ struct Value *evaluateAddExpr(struct ParseAddExpr *addExpr) {
     } 
 }
 
-
-
 struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
     struct Value *left = evaluateExponExpr(multExpr->left);
     if (!left) {
@@ -200,8 +249,6 @@ struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
     } 
 }
 
-
-
 struct Value *evaluateExponExpr(struct ParseExponExpr *exponExpr) {
     struct Value *left = evaluateUnaryExpr(exponExpr->left);
     if (!left) {
@@ -217,46 +264,63 @@ struct Value *evaluateExponExpr(struct ParseExponExpr *exponExpr) {
         return NULL;
     }
 
-    switch (exponExpr->operator) {
-        case EXPONENT: return exponent(left, right);
-        default: return NULL;
-    } 
+    if (exponExpr->operator == EXPONENT)
+        return exponent(left, right);
+    
+    return NULL;
 }
 
-
 struct Value *evaluateUnaryExpr(struct ParseUnaryExpr *unaryExpr) {
-    struct Value *operand = evaluatePrimaryExpr(unaryExpr->operand);
+    
+    struct Value *operand = evaluatePrimaryExpr(unaryExpr->operand, unaryExpr->sign);
     if (!operand) {
         return NULL;
     }
-
-    if ((unaryExpr->sign = -1 || unaryExpr->sign == 1) && operand->type == VSTRING) {
-        InterpreterError("Strings cannot have signs");
-        return NULL;
-    }
-
-    return signedExpr(operand, unaryExpr->sign);
+    return operand;
 }
 
-
-struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr) {
+struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short int sign) {
     struct Value *expr = malloc(sizeof(struct Value *));
     switch (primaryExpr->type) {
         case INTEGER:
             expr->type = VINT;
             expr->integer = primaryExpr->integer;
+            if (sign != 0)
+                expr->integer *= sign;
             break;
         case REAL:
             expr->type = VREAL;
             expr->real = primaryExpr->real;
+            if (sign != 0)
+                expr->real *= sign;
             break;
         case STRING:
             expr->type = VSTRING;
+            if (sign != 0) {
+                printf("Runtime Error: Strings cannot have signs");
+                return NULL;
+            }
             expr->string = primaryExpr->string;
             break;
         case EXPRESSION: 
             expr = evaluateExpr(primaryExpr->expr);
-        case NVAR: case SVAR: //tf do i do here
+            if (sign == 0)
+                break;
+            if (expr->type == VINT)
+                expr->integer *= sign;
+            else if (expr->type == VREAL)
+                expr->real *= sign;
+            break;
+        case NVAR: case SVAR:
+            struct VariableList *temp = head;
+            while (temp) {
+                if (strncmp(primaryExpr->ident, temp->variable, 50) == 0) {
+                    expr = temp->value;
+                    return expr;
+                }
+                temp = temp->next;
+            }
+            printf("Runtime Error: Attempted to use uninitialized variable (%s)", primaryExpr->ident);
         default:
             return NULL;
     }

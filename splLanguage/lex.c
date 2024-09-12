@@ -11,8 +11,8 @@ enum TokenState
 
 struct LexItem* getNextToken(FILE* input, int* line)
 {
-    char lexeme[100] = {'\0'}, current, peek;
-    struct LexItem *lexP = malloc(sizeof(struct LexItem));
+    /*char lexeme[100] = {'\0'}*/ char *lexeme = malloc(sizeof(char *)), current, peek;
+    struct LexItem *lexP = malloc(sizeof(struct LexItem *));
     size_t length = 0;
     enum TokenState lexstate = START;
 

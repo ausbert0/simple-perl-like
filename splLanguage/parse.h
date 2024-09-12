@@ -55,7 +55,7 @@ struct ParseStmt
 
 struct ParseVar
 {
-    struct LexItem *variable;
+    char *variable;
 };
 
 struct ParseExprList
@@ -100,14 +100,14 @@ struct ParseExponExpr
 struct ParseUnaryExpr
 {
     struct ParsePrimaryExpr *operand;
-    int sign; //-1 = negative, 1 = positive or not given
+    short int sign; //-1 = negative, 1 = positive or not given
 };
 
 struct ParsePrimaryExpr
 {
     union
     {
-        struct LexItem *ident; // NVAR, SVAR, ID
+        char *ident; // NVAR, SVAR, ID
         struct ParseExpr *expr;
         int integer;
         double real;

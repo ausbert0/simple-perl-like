@@ -3,7 +3,7 @@
 	$x = 3.0;
 	@str = 'false';
 	
-	if(@str -gt $x)
+	if(@str -g $x)
 	{
 		@str = 'true';
 	}

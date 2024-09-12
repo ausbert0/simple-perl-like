@@ -28,9 +28,4 @@ struct Value *srepeat(struct Value *left, struct Value *right);
 //ExponExpr ::= UnaryExpr { ^ UnaryExpr }
 struct Value *exponent(struct Value *left, struct Value *right);
 
-//UnaryExpr ::= [( - | + )] PrimaryExpr
-struct Value *signedExpr(struct Value *value, short unsigned int sign);
-
-// struct Value *exponent(struct Value *left, struct Value *right);
-
 #endif

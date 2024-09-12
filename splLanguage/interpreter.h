@@ -1,7 +1,7 @@
 #ifndef INTERPRETER_H_
 #define INTERPRETER_H_
-
 #include "parse.h"
+
 enum ValueTypes
 {
     VINT, VREAL, VSTRING, VBOOL
@@ -18,12 +18,21 @@ struct Value
     enum ValueTypes type;
 };
 
-unsigned short int interpret(struct ParseTree *);
+struct VariableList 
+{
+    struct VariableList *next;
+    char *variable;
+    struct Value *value;
+};
+
+unsigned short int Interpret(struct ParseTree *);
 unsigned short int evaluateStmtList(struct ParseStmtList *);
 unsigned short int evaluateStmt(struct ParseStmt *);
 unsigned short int evaluateIfStmt(struct ParseIfStmt *);
-unsigned short int evaluateAssignStmt(struct ParseAssignStmt *);
 unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *);
+
+unsigned short int evaluateAssignStmt(struct ParseAssignStmt *);
+// struct Value *evaluateVar(struct ParseVar *);
 
 struct Value **evaluateExprList(struct ParseExprList *);
 
@@ -39,6 +48,6 @@ struct Value *evaluateExponExpr(struct ParseExponExpr *);
 
 struct Value *evaluateUnaryExpr(struct ParseUnaryExpr *);
 
-struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *);
+struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *, short int);
 
 #endif
