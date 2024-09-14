@@ -1,7 +1,7 @@
 #Illegal operand for the sign operation
 	$r = 50;
 	@flag = 'true';
-	if (@flag -eq 'true') {
+	if (@flag -e 'true') {
 		$y_1 = $r * 5;
 		@flag = -'hello';
 	}

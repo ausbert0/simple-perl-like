@@ -3,7 +3,7 @@
 	@flag = 'true';
 	
 	
-	if (@flag -eq 'true') {
+	if (@flag -e 'true') {
 		$y_1 = $r * 5;
 		$r = $r + @flag;
 		@flag = 'hello';

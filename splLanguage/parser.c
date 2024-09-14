@@ -401,9 +401,9 @@ struct ParseAddExpr *AddExpr(FILE* input, int* line)
             return NULL;
         }
         addExpr->operator = lex->token;
-        addExpr->left = multExpr;
+        addExpr->right->left = multExpr;
         addExpr = addExpr->right;
-        addExpr->right = NULL;
+        // addExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
@@ -437,9 +437,9 @@ struct ParseMultExpr *MultExpr(FILE* input, int* line)
             return NULL;
         }
         multExpr->operator = lex->token;
-        multExpr->left = exponExpr;
+        multExpr->right->left = exponExpr;
         multExpr = multExpr->right;
-        multExpr->right = NULL;
+        // multExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
@@ -472,9 +472,9 @@ struct ParseExponExpr *ExponExpr(FILE* input, int* line)
             return NULL;
         }
         exponExpr->operator = lex->token;
-        exponExpr->left = unaryExpr;
+        exponExpr->right->left = unaryExpr;
         exponExpr = exponExpr->right;
-        exponExpr->right = NULL;
+        // exponExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);

@@ -27,18 +27,18 @@ int main(int argc, char *argv[])
             return 1;           
     }
 
-    // parser test
+    // parser testing
     struct ParseTree *yeet = Prog(file, &lineNumber);
     if (!yeet)
         return 0;
 
-    // interpreter test
+    // interpreter testing
     if(Interpret(yeet))
         return 1;
     return 0;
 
     
-    // lexical analyzer test loop
+    // // lexical analyzer testing loop
     // struct tokMap tokenMap[] = 
     // {
     //     {WRITELN, "WRITELN"},
