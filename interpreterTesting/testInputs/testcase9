@@ -6,7 +6,7 @@ $x = 0.5; #numeric variable
 $z = 0.0 ;
 @r_25 = 50.;
 
-@str = @_y -eq 'Hello';
+@str = @_y -e 'Hello';
 
 writeln ($x1, ' ', @r_25, ' ', @_y1, ' ', @str);
    

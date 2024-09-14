@@ -115,12 +115,10 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
         return 0;
     }
 
-    struct VariableList *variable = malloc(sizeof(struct VariableList *));
-    *variable = (struct VariableList) {NULL, assign->var->variable, expression};
+    struct VariableList *variableList = malloc(sizeof(struct VariableList *));
+    *variableList = (struct VariableList) {NULL, assign->var->variable, expression};
 
     if (expression->type == VSTRING && (assign->var->variable[0] == '$')) {
-        
-        
         printf("Runtime Error: Attempted to assign string (%s) to numeric variable (%s)\n"
         , expression->string, assign->var->variable);
         return 0;
@@ -138,18 +136,18 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
         return 0;
     }
     if (!head) {
-        head = variable;
+        head = variableList;
         current = head;
         return 1;
     }
 
     if (!head->next) {
-        head->next = variable;
-        current = variable;
+        head->next = variableList;
+        current = variableList;
         return 1;
     }
 
-    current->next = variable;
+    current->next = variableList;
     current = current->next;
 
     return 1;

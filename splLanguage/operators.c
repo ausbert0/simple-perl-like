@@ -506,7 +506,7 @@ struct Value *srepeat(struct Value *left, struct Value *right)
     }
 
     struct Value *result = malloc(sizeof(struct Value *));
-    result->string = NULL;
+    result->string = malloc(sizeof(char *));
     
     strncpy(result->string, left->string, 128);
     for (int i = 0; i < right->integer; i++)

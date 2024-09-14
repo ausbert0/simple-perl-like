@@ -35,9 +35,9 @@ struct tokMap
 
 struct LexItem 
 {
-    enum Token token;
-    char* lexeme;
+    char *lexeme;
 	int line;
+	enum Token token;
 };
 
 extern struct LexItem* getNextToken(FILE* input, int* line);

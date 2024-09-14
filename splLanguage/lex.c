@@ -29,7 +29,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
 
                 if (current == EOF)
                 {
-                    *lexP = (struct LexItem) {DONE, lexeme, *line};
+                    *lexP = (struct LexItem) {lexeme, *line, DONE};
                     return lexP;
                 }
 
@@ -42,7 +42,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         lexstate = INCOMMENT;
                         break;
                     case '+':
-                        *lexP = (struct LexItem) {PLUS, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, PLUS};
                         return lexP;
                     case '-':
                         peek = getc(input);
@@ -50,18 +50,18 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         switch (peek)
                         {
                             case 'l': 
-                                *lexP = (struct LexItem) {SLTHAN, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, SLTHAN};
                                 return lexP;
                             case 'g':
-                                *lexP = (struct LexItem) {SGTHAN, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, SGTHAN};
                                 return lexP;    
                             case 'e':   
-                                *lexP = (struct LexItem) {SEQ, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, SEQ};
                                 return lexP;
                             default:
                                 lexeme[--length] = '\0';
                                 ungetc(peek, input);
-                                *lexP = (struct LexItem) {MINUS, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, MINUS};
                                 return lexP;
                         }
                     case '*':
@@ -69,55 +69,55 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         if (peek == '*')
                         {
                             lexeme[length++] = peek;
-                            *lexP = (struct LexItem) {SREPEAT, lexeme, *line};
+                            *lexP = (struct LexItem) {lexeme, *line, SREPEAT};
                             return lexP;
                         }
                         ungetc(peek, input);
-                        *lexP = (struct LexItem) {MULT, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, MULT};
                         return lexP;
                     case '/':
-                        *lexP = (struct LexItem) {DIV, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, DIV};
                         return lexP;
                     case '^':
-                        *lexP = (struct LexItem) {EXPONENT, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, EXPONENT};
                         return lexP;
                     case '=':
                         peek = getc(input);
                         if (peek == '=')
                         {
                             lexeme[length++] = peek;
-                            *lexP = (struct LexItem) {NEQ, lexeme, *line};
+                            *lexP = (struct LexItem) {lexeme, *line, NEQ};
                             return lexP;
                         }
                         ungetc(peek, input);
-                        *lexP = (struct LexItem) {ASSOP, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, ASSOP};
                         return lexP;   
                     case '(':
-                        *lexP = (struct LexItem) {LPAREN, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, LPAREN};
                         return lexP;
                     case ')':
-                        *lexP = (struct LexItem) {RPAREN, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, RPAREN};
                         return lexP;
                     case '{':
-                        *lexP = (struct LexItem) {LBRACES, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, LBRACES};
                         return lexP;                                  
                     case '}':
-                        *lexP = (struct LexItem) {RBRACES, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, RBRACES};
                         return lexP;
                     case '>':
-                        *lexP = (struct LexItem) {NGTHAN, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, NGTHAN};
                         return lexP;  
                     case '<':
-                        *lexP = (struct LexItem) {NLTHAN, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, NLTHAN};
                         return lexP; 
                     case '.':
-                        *lexP = (struct LexItem) {CAT, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, CAT};
                         return lexP;
                     case ';':
-                        *lexP = (struct LexItem) {SEMICOL, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, SEMICOL};
                         return lexP;
                     case ',':
-                        *lexP = (struct LexItem) {COMMA, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, COMMA};
                         return lexP;
                     case '\'':
                         lexstate = INSTRING;
@@ -138,7 +138,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         {
                             printf("Lexer Error: Unrecognized Token in Line %d (%s)\n", *line, lexeme);
                         }
-                        *lexP = (struct LexItem) {ERR, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, ERR};
                         return lexP;
                 }
                 break;
@@ -148,17 +148,17 @@ struct LexItem* getNextToken(FILE* input, int* line)
                     ungetc(current, input);
                     if (strcmp(lexeme, "if") == 0)
                     {
-                        *lexP = (struct LexItem) {IF, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, IF};
                         return lexP;
                     }
                     else if (strcmp(lexeme, "else") == 0)
                     {
-                        *lexP = (struct LexItem) {ELSE, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, ELSE};
                         return lexP;
                     }
                     else if (strcmp(lexeme, "writeln") == 0)
                     {
-                        *lexP = (struct LexItem) {WRITELN, lexeme, *line};
+                        *lexP = (struct LexItem) {lexeme, *line, WRITELN};
                         return lexP;
                     }
                     else
@@ -166,13 +166,13 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         switch (*lexeme)
                         {
                             case '$':
-                                *lexP = (struct LexItem) {NIDENT, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, NIDENT};
                                 return lexP;
                             case '@':
-                                *lexP = (struct LexItem) {SIDENT, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, SIDENT};
                                 return lexP;
                             default:
-                                *lexP = (struct LexItem) {IDENT, lexeme, *line};
+                                *lexP = (struct LexItem) {lexeme, *line, IDENT};
                                 return lexP;
                         }
                     }
@@ -189,7 +189,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 {
                     lexeme[--length] = '\0';
                     ungetc(current, input);
-                    *lexP = (struct LexItem) {ICONST, lexeme, *line};
+                    *lexP = (struct LexItem) {lexeme, *line, ICONST};
                     return lexP;
                 }
                 break;
@@ -198,27 +198,27 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 if (current == '.')
                 {
                     printf("Lexer Error: Extra . at Line %d (%s)\n", *line, lexeme);
-                    *lexP = (struct LexItem) {ERR, lexeme, *line};
+                    *lexP = (struct LexItem) {lexeme, *line, ERR};
                     return lexP;
                 }
                 if (!isdigit(current))
                 {
                     ungetc(current, input);
                     lexeme[--length] = '\0';
-                    *lexP = (struct LexItem) {RCONST, lexeme, *line};
+                    *lexP = (struct LexItem) {lexeme, *line, RCONST};
                     return lexP;
                 }
                 break;
             case INSTRING:
                 if (current == '\'')
                 {
-                    *lexP = (struct LexItem) {SCONST, strtok(lexeme, "\'"), *line};
+                    *lexP = (struct LexItem) {strtok(lexeme, "\'"), *line, SCONST};
                     return lexP;                    
                 }
                 if (current == '\n' || current == EOF)
                 {
                     printf("Lexer Error: Missing Closing \' at Line %d (%s)\n", *line, lexeme);
-                    *lexP = (struct LexItem) {ERR, strtok(lexeme, "\'"), *line};
+                    *lexP = (struct LexItem) {strtok(lexeme, "\'"), *line, ERR};
                     return lexP;
                 }
                 lexeme[length++] = current;
