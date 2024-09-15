@@ -40,7 +40,7 @@ void PushBackToken(struct LexItem *lex)
 //Program is: Prog ::= StmtList
 struct ParseTree *Prog(FILE* input, int* line)
 {
-    struct ParseTree *parser = malloc(sizeof(struct ParseTree *));
+    struct ParseTree *parser = malloc(sizeof(struct ParseTree));
     struct ParseStmtList *stmtList = StmtList(input, line);
     if (stmtList && (GetNextToken(input, line))->token == DONE)
     {
@@ -56,9 +56,9 @@ struct ParseTree *Prog(FILE* input, int* line)
 struct ParseStmtList *StmtList(FILE* input, int* line)
 {
     struct ParseStmt *stmt = NULL;
-    struct ParseStmt **stmtArr = malloc(sizeof(struct ParseStmt *) * 64); // 64 stmts
+    struct ParseStmt **stmtArr = malloc(sizeof(struct ParseStmt) * 64); // 64 stmts
     short unsigned int index = 0;
-    struct ParseStmtList *stmtList = malloc(sizeof(struct ParseStmtList *)); 
+    struct ParseStmtList *stmtList = malloc(sizeof(struct ParseStmtList)); 
     struct LexItem *lex = NULL;
     while ((stmt = Stmt(input, line)))
     {
@@ -96,7 +96,7 @@ struct ParseStmtList *StmtList(FILE* input, int* line)
 //Stmt ::= AssignStmt | WriteLnStmt | IfStmt
 struct ParseStmt *Stmt(FILE* input, int* line)
 {
-    struct ParseStmt *stmt = malloc(sizeof(struct ParseStmt *)); 
+    struct ParseStmt *stmt = malloc(sizeof(struct ParseStmt)); 
     struct LexItem* lex = GetNextToken(input, line);
     switch (lex->token)
     {
@@ -139,11 +139,7 @@ struct ParseStmt *Stmt(FILE* input, int* line)
         }
         case IDENT:
             ParseError(line, "Unrecognized identifier");
-            return NULL;
-        // case ELSE:
-        //     PushBackToken(lex); 
-        //     stmt->type = EXCEPTION;
-        //     return stmt;   
+            return NULL;   
         default:
             PushBackToken(lex); 
             stmt->type = EXCEPTION;
@@ -155,7 +151,7 @@ struct ParseStmt *Stmt(FILE* input, int* line)
 //WritelnStmt ::= writeln (ExprList)
 struct ParseWriteLnStmt *WriteLnStmt(FILE* input, int* line)
 {
-    struct ParseWriteLnStmt *writeStmt = malloc(sizeof(struct ParseWriteLnStmt *));
+    struct ParseWriteLnStmt *writeStmt = malloc(sizeof(struct ParseWriteLnStmt));
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token != LPAREN)
     {
@@ -181,9 +177,9 @@ struct ParseWriteLnStmt *WriteLnStmt(FILE* input, int* line)
 //ExprList:= Expr {,Expr}
 struct ParseExprList *ExprList(FILE* input, int* line)
 {
-    struct ParseExpr **exprArr = malloc(sizeof(struct exprArr *) * 16);
+    struct ParseExpr **exprArr = malloc(sizeof(struct ParseExpr) * 16);
     size_t length = 0;
-    struct ParseExprList *exprList = malloc(sizeof(struct ParseExprList *));
+    struct ParseExprList *exprList = malloc(sizeof(struct ParseExprList));
     struct LexItem* lex;
 
     while ((exprArr[length++] = Expr(input, line)))
@@ -210,7 +206,7 @@ struct ParseExprList *ExprList(FILE* input, int* line)
 //IfStmt ::= if (Expr) '{' StmtList '}' [ else '{' StmtList '}' ] 
 struct ParseIfStmt *IfStmt(FILE* input, int* line)
 {
-    struct ParseIfStmt *IfStmt = malloc(sizeof(struct ParseIfStmt *));
+    struct ParseIfStmt *IfStmt = malloc(sizeof(struct ParseIfStmt));
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token != LPAREN)
     {
@@ -279,7 +275,7 @@ struct ParseIfStmt *IfStmt(FILE* input, int* line)
 //AssignStmt ::= Var = Expr
 struct ParseAssignStmt *AssignStmt(FILE* input, int* line)
 {
-    struct ParseAssignStmt *assignStmt = malloc(sizeof(struct AssignStmt *));
+    struct ParseAssignStmt *assignStmt = malloc(sizeof(struct ParseAssignStmt));
     struct ParseVar *var = Var(input, line);
     if (!var)
     {
@@ -306,7 +302,7 @@ struct ParseAssignStmt *AssignStmt(FILE* input, int* line)
 struct ParseVar *Var(FILE* input, int* line)
 {
     struct LexItem *lex = GetNextToken(input, line);
-    struct ParseVar *var = malloc(sizeof(struct ParseVar *));
+    struct ParseVar *var = malloc(sizeof(struct ParseVar));
     if (lex->token == NIDENT || lex->token == SIDENT)
     {
         *var = (struct ParseVar) {lex->lexeme};
@@ -319,14 +315,14 @@ struct ParseVar *Var(FILE* input, int* line)
 //Expr ::= RelExpr [(-eq|==) RelExpr]
 struct ParseExpr *Expr(FILE* input, int* line)
 {
-    struct ParseRelExpr *relExpr1 = RelExpr(input, line), *relExpr2;
+    struct ParseRelExpr *relExpr1 = RelExpr(input, line), *relExpr2 = NULL;
 
     if (!relExpr1)
     {
         return NULL;
     }
     
-    struct ParseExpr *expr = malloc(sizeof(struct ParseExpr *));
+    struct ParseExpr *expr = malloc(sizeof(struct ParseExpr));
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token == NEQ || lex->token == SEQ)
     {
@@ -347,13 +343,13 @@ struct ParseExpr *Expr(FILE* input, int* line)
 //RelExpr ::= AddExpr [ ( -lt | -gt | < | > )  AddExpr ]
 struct ParseRelExpr *RelExpr(FILE* input, int* line)
 {
-    struct ParseAddExpr *addExpr1 = AddExpr(input, line), *addExpr2;
+    struct ParseAddExpr *addExpr1 = AddExpr(input, line), *addExpr2 = NULL;
     if (!addExpr1)
     {
         return NULL;
     }
     
-    struct ParseRelExpr *relExpr = malloc(sizeof(struct ParseRelExpr *));
+    struct ParseRelExpr *relExpr = malloc(sizeof(struct ParseRelExpr));
     struct LexItem* lex = GetNextToken(input, line);
     
     if (lex->token == NLTHAN || lex->token == NGTHAN 
@@ -383,7 +379,7 @@ struct ParseAddExpr *AddExpr(FILE* input, int* line)
         return NULL;
     }
     
-    struct ParseAddExpr *addExprAST = malloc(sizeof(struct ParseAddExpr *));
+    struct ParseAddExpr *addExprAST = malloc(sizeof(struct ParseAddExpr));
     addExprAST->left = multExpr;
     addExprAST->right = NULL; // accounts for no operator if none are found
     
@@ -393,7 +389,7 @@ struct ParseAddExpr *AddExpr(FILE* input, int* line)
     struct LexItem* lex = GetNextToken(input, line);
     while (lex->token == PLUS || lex->token == MINUS || lex->token == CAT)
     {
-        addExpr->right = malloc(sizeof(struct ParseAddExpr *));
+        addExpr->right = malloc(sizeof(struct ParseAddExpr));
         multExpr = MultExpr(input, line);
         if (!multExpr)
         {
@@ -403,7 +399,7 @@ struct ParseAddExpr *AddExpr(FILE* input, int* line)
         addExpr->operator = lex->token;
         addExpr->right->left = multExpr;
         addExpr = addExpr->right;
-        // addExpr->right = NULL;
+        addExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
@@ -419,7 +415,7 @@ struct ParseMultExpr *MultExpr(FILE* input, int* line)
         return NULL;
     }
     
-    struct ParseMultExpr *multExprAST = malloc(sizeof(struct ParseMultExpr *));
+    struct ParseMultExpr *multExprAST = malloc(sizeof(struct ParseMultExpr));
     multExprAST->right = NULL;
     multExprAST->left = exponExpr;
     
@@ -429,7 +425,7 @@ struct ParseMultExpr *MultExpr(FILE* input, int* line)
     struct LexItem* lex = GetNextToken(input, line);
     while (lex->token == MULT || lex->token == DIV || lex->token == SREPEAT)
     {
-        multExpr->right = malloc(sizeof(struct ParseMultExpr *));
+        multExpr->right = malloc(sizeof(struct ParseMultExpr));
         exponExpr = ExponExpr(input, line);
         if (!exponExpr)
         {
@@ -439,7 +435,7 @@ struct ParseMultExpr *MultExpr(FILE* input, int* line)
         multExpr->operator = lex->token;
         multExpr->right->left = exponExpr;
         multExpr = multExpr->right;
-        // multExpr->right = NULL;
+        multExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
@@ -455,7 +451,7 @@ struct ParseExponExpr *ExponExpr(FILE* input, int* line)
         return NULL;
     }
     
-    struct ParseExponExpr *exponExprAST = malloc(sizeof(struct ParseExponExpr *));
+    struct ParseExponExpr *exponExprAST = malloc(sizeof(struct ParseExponExpr));
     exponExprAST->right = NULL;
     exponExprAST->left = unaryExpr;
     
@@ -464,7 +460,7 @@ struct ParseExponExpr *ExponExpr(FILE* input, int* line)
     struct LexItem* lex = GetNextToken(input, line);
     while (lex->token == EXPONENT)
     {
-        exponExpr->right = malloc(sizeof(struct ParseExponExpr *));
+        exponExpr->right = malloc(sizeof(struct ParseExponExpr));
         unaryExpr = UnaryExpr(input, line);
         if (!unaryExpr)
         {
@@ -474,7 +470,7 @@ struct ParseExponExpr *ExponExpr(FILE* input, int* line)
         exponExpr->operator = lex->token;
         exponExpr->right->left = unaryExpr;
         exponExpr = exponExpr->right;
-        // exponExpr->right = NULL;
+        exponExpr->right = NULL;
         lex = GetNextToken(input, line);
     }
     PushBackToken(lex);
@@ -484,7 +480,7 @@ struct ParseExponExpr *ExponExpr(FILE* input, int* line)
 //UnaryExpr ::= [( - | + )] PrimaryExpr
 struct ParseUnaryExpr *UnaryExpr(FILE* input, int* line)
 {
-    struct ParseUnaryExpr *unaryExpr = malloc(sizeof(struct ParseUnaryExpr *));
+    struct ParseUnaryExpr *unaryExpr = malloc(sizeof(struct ParseUnaryExpr));
     int sign = 0; // no sign, to handle if strings have a +- before them (invalid case)
     struct LexItem* lex = GetNextToken(input, line);
     if (lex->token == PLUS)
@@ -505,8 +501,8 @@ struct ParseUnaryExpr *UnaryExpr(FILE* input, int* line)
 //PrimaryExpr ::= IDENT | NIDENT | SIDENT | ICONST | RCONST | SCONST | (Expr)
 struct ParsePrimaryExpr *PrimaryExpr(FILE* input, int* line)
 {
-    struct ParsePrimaryExpr *primaryExpr = malloc(sizeof(struct ParsePrimaryExpr *));
-    struct ParseExpr *expr; 
+    struct ParsePrimaryExpr *primaryExpr = malloc(sizeof(struct ParsePrimaryExpr));
+    struct ParseExpr *expr = NULL; 
     struct LexItem *lex = GetNextToken(input, line);
     switch (lex->token)
     {

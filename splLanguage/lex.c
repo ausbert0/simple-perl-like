@@ -11,8 +11,11 @@ enum TokenState
 
 struct LexItem* getNextToken(FILE* input, int* line)
 {
-    char *lexeme = malloc(sizeof(char *)), current, peek;
-    struct LexItem *lexP = malloc(sizeof(struct LexItem *));
+    char *lexeme = malloc(sizeof(char) * 128);
+    lexeme[127] = '\0';
+
+    char current = '\0', peek = '\0';
+    struct LexItem *lexP = malloc(sizeof(struct LexItem));
     size_t length = 0;
     enum TokenState lexstate = START;
 
@@ -34,6 +37,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 }
 
                 lexeme[length++] = current;
+                lexeme[length] = '\0';
 
                 switch(current)
                 {
@@ -47,6 +51,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                     case '-':
                         peek = getc(input);
                         lexeme[length++] = peek;
+                        lexeme[length] = '\0';
                         switch (peek)
                         {
                             case 'l': 
@@ -69,6 +74,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         if (peek == '*')
                         {
                             lexeme[length++] = peek;
+                            lexeme[length] = '\0';
                             *lexP = (struct LexItem) {lexeme, *line, SREPEAT};
                             return lexP;
                         }
@@ -86,6 +92,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                         if (peek == '=')
                         {
                             lexeme[length++] = peek;
+                            lexeme[length] = '\0';
                             *lexP = (struct LexItem) {lexeme, *line, NEQ};
                             return lexP;
                         }
@@ -143,6 +150,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 }
                 break;
             case INID:
+                lexeme[length] = '\0';
                 if (!isalnum(current) && current != '_')
                 {
                     ungetc(current, input);
@@ -212,6 +220,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
             case INSTRING:
                 if (current == '\'')
                 {
+                    lexeme[length] = '\0';
                     *lexP = (struct LexItem) {strtok(lexeme, "\'"), *line, SCONST};
                     return lexP;                    
                 }

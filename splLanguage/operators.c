@@ -43,7 +43,7 @@ struct Value *neq(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     result->bool = operand1 == operand2;
     result->type = VBOOL;
     return result;
@@ -82,7 +82,7 @@ struct Value *seq(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     result->bool = strncmp(operand1, operand2, 128) == 0;
     result->type = VBOOL;
     return result;
@@ -121,7 +121,7 @@ struct Value *slthan(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     result->bool = strncmp(operand1, operand2, 128) < 0;
     result->type = VBOOL;
     return result;
@@ -161,7 +161,7 @@ struct Value *sgthan(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     result->bool = strncmp(operand1, operand2, 128) > 0;
     result->type = VBOOL;
     return result;
@@ -207,7 +207,7 @@ struct Value *nlthan(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     result->bool = operand1 < operand2;
     result->type = VBOOL;
     return result;
@@ -253,7 +253,7 @@ struct Value *ngthan(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     result->bool = operand1 > operand2;
     result->type = VBOOL;
     return result;
@@ -261,7 +261,7 @@ struct Value *ngthan(struct Value *left, struct Value *right)
 
 struct Value *plus(struct Value *left, struct Value *right)
 {   
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
 
     switch (left->type)
     {
@@ -310,7 +310,7 @@ struct Value *plus(struct Value *left, struct Value *right)
 
 struct Value *minus(struct Value *left, struct Value *right)
 {   
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
 
     switch (left->type)
     {
@@ -359,7 +359,7 @@ struct Value *minus(struct Value *left, struct Value *right)
 
 struct Value *cat(struct Value *left, struct Value *right)
 {   
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
     
     char *operand1 = {'\0'}, *operand2 = {'\0'};
 
@@ -393,7 +393,7 @@ struct Value *cat(struct Value *left, struct Value *right)
             printf("Runtime Error: Booleans cannot be used for string operation (.)\n");
             return NULL;
     }
-    result->string = malloc(sizeof(char *));
+    result->string = malloc(sizeof(char) * 256);
     strncpy(result->string, operand1, 128);
     strncat(result->string, operand2, 128);
     
@@ -403,7 +403,7 @@ struct Value *cat(struct Value *left, struct Value *right)
 
 struct Value *mult(struct Value *left, struct Value *right)
 {   
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
 
     switch (left->type)
     {
@@ -452,7 +452,7 @@ struct Value *mult(struct Value *left, struct Value *right)
 
 struct Value *divide(struct Value *left, struct Value *right)
 {   
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
 
     switch (left->type)
     {
@@ -505,8 +505,9 @@ struct Value *srepeat(struct Value *left, struct Value *right)
         return NULL;
     }
 
-    struct Value *result = malloc(sizeof(struct Value *));
-    result->string = malloc(sizeof(char *));
+    struct Value *result = malloc(sizeof(struct Value));
+    result->string = malloc(sizeof(char) * 256);
+    result->string[255] = '\0';
     
     strncpy(result->string, left->string, 128);
     for (int i = 0; i < right->integer; i++)
@@ -517,7 +518,7 @@ struct Value *srepeat(struct Value *left, struct Value *right)
 
 struct Value *exponent(struct Value *left, struct Value *right)
 {   
-    struct Value *result = malloc(sizeof(struct Value *));
+    struct Value *result = malloc(sizeof(struct Value));
 
     switch (left->type)
     {

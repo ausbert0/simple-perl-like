@@ -115,7 +115,7 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
         return 0;
     }
 
-    struct VariableList *variableList = malloc(sizeof(struct VariableList *));
+    struct VariableList *variableList = malloc(sizeof(struct VariableList));
     *variableList = (struct VariableList) {NULL, assign->var->variable, expression};
 
     if (expression->type == VSTRING && (assign->var->variable[0] == '$')) {
@@ -124,10 +124,17 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
         return 0;
     }
 
-    else if ((expression->type == VREAL || expression->type == VINT) && (assign->var->variable[0] == '@')) {
-        printf("Runtime Error: Attempted to assign number (%s) to string variable (%s)\n"
-        , expression->string, assign->var->variable);
-        return 0;
+    else if ((assign->var->variable[0] == '@')) {
+        if (expression->type == VREAL) {
+            printf("Runtime Error: Attempted to assign real (%lf) to string variable (%s)\n"
+            , expression->real, assign->var->variable);
+            return 0;
+        }
+        else if (expression->type == VINT) {
+            printf("Runtime Error: Attempted to assign integer (%d) to string variable (%s)\n"
+            , expression->integer, assign->var->variable);   
+            return 0;         
+        }
     }
 
     else if (expression->type == VBOOL) {
@@ -135,6 +142,7 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
         , expression->string);
         return 0;
     }
+    
     if (!head) {
         head = variableList;
         current = head;
@@ -176,7 +184,7 @@ unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *writeLn) {
 
 struct Value **evaluateExprList(struct ParseExprList *exprList)
 {
-    struct Value **values = malloc(sizeof(struct Value **) * exprList->length);
+    struct Value **values = malloc(sizeof(struct Value) * exprList->length);
     for (int i = 0; i < exprList->length; i++) {
         struct Value *expr = evaluateExpr(exprList->expr[i]);
         if (!expr) {
@@ -184,6 +192,7 @@ struct Value **evaluateExprList(struct ParseExprList *exprList)
         }
         values[i] = expr;
     }
+    return NULL;
     return values;
 }
 
@@ -319,7 +328,7 @@ struct Value *evaluateUnaryExpr(struct ParseUnaryExpr *unaryExpr) {
 }
 
 struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short int sign) {
-    struct Value *expr = malloc(sizeof(struct Value *));
+    struct Value *expr = malloc(sizeof(struct Value));
     switch (primaryExpr->type) {
         case INTEGER:
             expr->type = VINT;
@@ -355,7 +364,7 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
             while (temp) {
                 if (strncmp(primaryExpr->ident, temp->variable, 128) == 0) {
                     expr = temp->value;
-                    return expr;
+                    break;
                 }
                 temp = temp->next;
             }
