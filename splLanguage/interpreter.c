@@ -18,7 +18,7 @@ unsigned short int Interpret(struct ParseTree *parseTree) {
             return 0;
         }
     }
-    else {
+    else { 
         printf("-------------------------------\nInvalid Parse Tree, interpretation will not be done\n");
         return 0;
     }
@@ -116,6 +116,18 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
     }
 
     struct VariableList *variableList = malloc(sizeof(struct VariableList));
+    
+    struct VariableList *temp = head;
+    
+    // search to see if the variable already exists and update its value
+    while (temp) {
+        if (strncmp(assign->var->variable, temp->variable, 128) == 0) {
+            temp->value = expression;
+            break;
+        }
+        temp = temp->next;
+    }
+
     *variableList = (struct VariableList) {NULL, assign->var->variable, expression};
 
     if (expression->type == VSTRING && (assign->var->variable[0] == '$')) {
@@ -124,22 +136,9 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
         return 0;
     }
 
-    else if ((assign->var->variable[0] == '@')) {
-        if (expression->type == VREAL) {
-            printf("Runtime Error: Attempted to assign real (%lf) to string variable (%s)\n"
-            , expression->real, assign->var->variable);
-            return 0;
-        }
-        else if (expression->type == VINT) {
-            printf("Runtime Error: Attempted to assign integer (%d) to string variable (%s)\n"
-            , expression->integer, assign->var->variable);   
-            return 0;         
-        }
-    }
-
-    else if (expression->type == VBOOL) {
+    if (expression->type == VBOOL) {
         printf("Runtime Error: Attempted to assign boolean value to variable (%s)\n"
-        , expression->string);
+        , assign->var->variable);
         return 0;
     }
     
@@ -192,7 +191,6 @@ struct Value **evaluateExprList(struct ParseExprList *exprList)
         }
         values[i] = expr;
     }
-    return NULL;
     return values;
 }
 
@@ -280,6 +278,11 @@ struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
     if (!multExpr->right) {
         return left;
     }
+
+    struct Value *right = evaluateMultExpr(multExpr->right);
+    if (!right) {
+        return NULL;
+    }
     
     struct Value *right = evaluateMultExpr(multExpr->right);
     if (!right) {
@@ -291,7 +294,7 @@ struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
         case DIV: return divide(left, right);
         case SREPEAT: return srepeat(left, right);
         default: return NULL;
-    } 
+    }    
 }
 
 struct Value *evaluateExponExpr(struct ParseExponExpr *exponExpr) {
@@ -329,6 +332,7 @@ struct Value *evaluateUnaryExpr(struct ParseUnaryExpr *unaryExpr) {
 
 struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short int sign) {
     struct Value *expr = malloc(sizeof(struct Value));
+    struct VariableList *temp = head;
     switch (primaryExpr->type) {
         case INTEGER:
             expr->type = VINT;
@@ -345,7 +349,7 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
         case STRING:
             expr->type = VSTRING;
             if (sign != 0) {
-                printf("Runtime Error: + or - before a string is invalid\n");
+                printf("Runtime Error: + or - detected before string\n");
                 return NULL;
             }
             expr->string = primaryExpr->string;
@@ -359,12 +363,31 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
             else if (expr->type == VREAL)
                 expr->real *= sign;
             break;
-        case NVAR: case SVAR:
-            struct VariableList *temp = head;
+        case NVAR: 
             while (temp) {
                 if (strncmp(primaryExpr->ident, temp->variable, 128) == 0) {
                     expr = temp->value;
-                    break;
+                    if (sign == 0)
+                        return expr;
+                    if (expr->type == VINT)
+                        expr->integer *= sign;
+                    else if (expr->type == VREAL)
+                        expr->real *= sign;
+                    return expr;
+                }
+                temp = temp->next;
+            }
+            printf("Runtime Error: Attempted to use uninitialized variable (%s)\n", primaryExpr->ident);
+            return NULL;        
+        case SVAR:
+            if (sign != 0) {
+                printf("Runtime Error: Signs are not allowed before string variables (%s)\n", primaryExpr->ident);
+                return NULL;
+            }
+            while (temp) {
+                if (strncmp(primaryExpr->ident, temp->variable, 128) == 0) {
+                    expr = temp->value;
+                    return expr;
                 }
                 temp = temp->next;
             }

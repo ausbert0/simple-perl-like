@@ -171,6 +171,12 @@ struct LexItem* getNextToken(FILE* input, int* line)
                     }
                     else
                     {
+                        if (strlen(lexeme) == 1 && !isalnum(*lexeme)) 
+                        {
+                            printf("Lexer Error: Missing variable name after %s at line %d\n", lexeme, *line);
+                            *lexP = (struct LexItem) {lexeme, *line, ERR};
+                            return lexP;
+                        }
                         switch (*lexeme)
                         {
                             case '$':
@@ -191,6 +197,14 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 lexeme[length++] = current;
                 if (current == '.')
                 {
+                    if ((peek = getc(input)) && !isdigit(peek)) 
+                    {
+                        ungetc(peek, input);
+                        lexeme[--length] = '\0';
+                        *lexP = (struct LexItem) {lexeme, *line, ICONST};
+                        return lexP;
+                    }
+                    ungetc(peek, input);
                     lexstate = INREAL;
                 }
                 else if (!isdigit(current))
