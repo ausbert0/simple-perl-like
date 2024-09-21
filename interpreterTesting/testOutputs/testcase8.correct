@@ -1,7 +1,5 @@
-1. Line # 4: Illegal Type for If statement condition.
-2. Line # 4: Incorrect If-Statement.
-3. Line # 4: Syntactic error in Program Body.
-4. Line # 4: Missing Program
-
-Unsuccessful Interpretation
-Number of Errors 4
+Interpreter Error: Non-conditional expression in if-statement
+Interpreter Error: Invalid if statement
+-------------------------------
+Interpreter error(s) encountered
+-------------------------------

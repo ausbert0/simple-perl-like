@@ -3,7 +3,7 @@
 	$x = 3.0;
 	@str = 'false';
 	
-	@str = $x / $r * $x; 
+	@str = $x / $r * $x / 3; 
 	
 	writeln ( $x, ' ', @str);
 		

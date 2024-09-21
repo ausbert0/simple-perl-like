@@ -1,10 +1,8 @@
-1. Line # 6: Illegal Operand Type for Sign Operator
-2. Line # 6: Missing Expression in Assignment Statement
-3. Line # 6: Incorrect Assignment Statement.
-4. Line # 6: Syntactic error in Program Body.
-5. Line # 6: Missing Statement for If-Stmt Clause
-6. Line # 6: Incorrect If-Statement.
-7. Line # 7: Missing Program
-
-Unsuccessful Interpretation
-Number of Errors 7
+Interpreter Error: + or - detected before string
+Interpreter Error: Invalid expression to assign to string variable (@flag)
+Interpreter Error: Invalid assignment statement
+Interpreter Error(s) detected in if-clause
+Interpreter Error: Invalid if statement
+-------------------------------
+Interpreter error(s) encountered
+-------------------------------

@@ -1,10 +1,8 @@
-1. Line # 6: Unrecognized Input Pattern
-($)
-2. Line # 6: Missing operand after operator
-3. Line # 6: Missing Expression in Assignment Statement
-4. Line # 6: Incorrect Assignment Statement.
-5. Line # 6: Syntactic error in Program Body.
-6. Line # 6: Missing Program
-
-Unsuccessful Interpretation
-Number of Errors 6
+Lexer Error: Missing variable name after $ at line 6
+Parser Error 1) Line # 6: Missing operand after operator
+Parser Error 2) Line # 6: Missing expression in assignment statement
+Parser Error 3) Line # 6: Incorrect assignment statement
+Parser Error 4) Line # 6: Syntactic error in program body
+-------------------------------
+Parsing error(s) encountered
+-------------------------------

@@ -1,9 +1,6 @@
-Invalid conversion from string to double.
-1. Line # 6: Illegal Relational operation.
-2. Line # 6: Missing if statement Logic Expression
-3. Line # 6: Incorrect If-Statement.
-4. Line # 6: Syntactic error in Program Body.
-5. Line # 6: Missing Program
-
-Unsuccessful Interpretation
-Number of Errors 5
+Interpreter Error: Invalid conversion from string to double
+Interpreter Error: Invalid conditional expression in if-statement
+Interpreter Error: Invalid if statement
+-------------------------------
+Interpreter error(s) encountered
+-------------------------------

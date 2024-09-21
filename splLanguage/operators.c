@@ -17,12 +17,12 @@ struct Value *neq(struct Value *left, struct Value *right)
             break;
         case VSTRING:
             if (!(operand1 = strtod(left->string, &remainingCharacters))) {
-                printf("Runtime Error: Invalid conversion from string to double\n");
+                printf("Interpreter Error: Invalid conversion from string to double\n");
                 return NULL;
             }
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
     switch (right->type)
@@ -35,12 +35,12 @@ struct Value *neq(struct Value *left, struct Value *right)
             break;
         case VSTRING:
             if (!(operand2 = strtod(left->string, &remainingCharacters))) {
-                printf("Runtime Error: Invalid conversion from string to double\n");
+                printf("Interpreter Error: Invalid conversion from string to double\n");
                 return NULL;
             }
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
     struct Value *result = malloc(sizeof(struct Value));
@@ -64,7 +64,7 @@ struct Value *seq(struct Value *left, struct Value *right)
             strncpy(operand1, left->string, 128);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with string operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
     switch (right->type)
@@ -79,7 +79,7 @@ struct Value *seq(struct Value *left, struct Value *right)
             strncpy(operand2, right->string, 128);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with string operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
     struct Value *result = malloc(sizeof(struct Value));
@@ -103,7 +103,7 @@ struct Value *slthan(struct Value *left, struct Value *right)
             strncpy(operand1, left->string, 128);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with string operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
     switch (right->type)
@@ -118,7 +118,7 @@ struct Value *slthan(struct Value *left, struct Value *right)
             strncpy(operand2, right->string, 128);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with string operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
     struct Value *result = malloc(sizeof(struct Value));
@@ -143,7 +143,7 @@ struct Value *sgthan(struct Value *left, struct Value *right)
             strncpy(operand1, left->string, 128);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with string operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
     switch (right->type)
@@ -158,7 +158,7 @@ struct Value *sgthan(struct Value *left, struct Value *right)
             strncpy(operand1, right->string, 128);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with string operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with string operators\n");
             return NULL;
     }
     struct Value *result = malloc(sizeof(struct Value));
@@ -181,12 +181,12 @@ struct Value *nlthan(struct Value *left, struct Value *right)
             break;
         case VSTRING:
             if (!(operand1 = strtod(left->string, &remainingCharacters))) {
-                printf("Runtime Error: Invalid conversion from string to double\n");
+                printf("Interpreter Error: Invalid conversion from string to double\n");
                 return NULL;
             }
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
     switch (right->type)
@@ -199,12 +199,12 @@ struct Value *nlthan(struct Value *left, struct Value *right)
             break;
         case VSTRING:
             if (!(operand2 = strtod(left->string, &remainingCharacters))) {
-                printf("Runtime Error: Invalid conversion from string to double\n");
+                printf("Interpreter Error: Invalid conversion from string to double\n");
                 return NULL;
             }
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
     struct Value *result = malloc(sizeof(struct Value));
@@ -227,12 +227,12 @@ struct Value *ngthan(struct Value *left, struct Value *right)
             break;
         case VSTRING:
             if (!(operand1 = strtod(left->string, &remainingCharacters))) {
-                printf("Runtime Error: Invalid conversion from string to double\n");
+                printf("Interpreter Error: Invalid conversion from string to double\n");
                 return NULL;
             }
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
     switch (right->type)
@@ -245,12 +245,12 @@ struct Value *ngthan(struct Value *left, struct Value *right)
             break;
         case VSTRING:
             if (!(operand2 = strtod(left->string, &remainingCharacters))) {
-                printf("Runtime Error: Invalid conversion from string to double\n");
+                printf("Interpreter Error: Invalid conversion from string to double\n");
                 return NULL;
             }
             break;
         default:
-            printf("Runtime Error: Booleans cannot be compared with numerical operators\n");
+            printf("Interpreter Error: Booleans cannot be compared with numerical operators\n");
             return NULL;
     }
     struct Value *result = malloc(sizeof(struct Value));
@@ -274,10 +274,10 @@ struct Value *plus(struct Value *left, struct Value *right)
             result->type = VINT;
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (+)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (+)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (+)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (+)\n");
             return NULL;
     }
     switch (right->type)
@@ -299,10 +299,10 @@ struct Value *plus(struct Value *left, struct Value *right)
             } 
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (+)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (+)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (+)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (+)\n");
             return NULL;
     }
     return result;
@@ -323,10 +323,10 @@ struct Value *minus(struct Value *left, struct Value *right)
             result->type = VINT;
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (-)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (-)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (-)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (-)\n");
             return NULL;
     }
     switch (right->type)
@@ -348,10 +348,10 @@ struct Value *minus(struct Value *left, struct Value *right)
             } 
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (-)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (-)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (-)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (-)\n");
             return NULL;
     }
     return result;
@@ -376,7 +376,7 @@ struct Value *cat(struct Value *left, struct Value *right)
             
             break;
         default:
-            printf("Runtime Error: Booleans cannot be used for string operation (.)\n");
+            printf("Interpreter Error: Booleans cannot be used for string operation (.)\n");
             return NULL;
     }
     operand1[511] = '\0';
@@ -393,7 +393,7 @@ struct Value *cat(struct Value *left, struct Value *right)
             strncpy(operand2, right->string, 512);
             break;
         default:
-            printf("Runtime Error: Booleans cannot be used for string operation (.)\n");
+            printf("Interpreter Error: Booleans cannot be used for string operation (.)\n");
             return NULL;
     }
     operand2[511] = '\0';
@@ -422,10 +422,10 @@ struct Value *mult(struct Value *left, struct Value *right)
             result->type = VINT;
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (*)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (*)\n");
             break;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (*)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (*)\n");
             return NULL;
     }
     switch (right->type)
@@ -447,10 +447,10 @@ struct Value *mult(struct Value *left, struct Value *right)
             } 
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (*)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (*)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (*)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (*)\n");
             return NULL;
     }
     return result;
@@ -469,10 +469,10 @@ struct Value *divide(struct Value *left, struct Value *right)
             result->real = left->integer;
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (/)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (/)\n");
             break;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (/)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (/)\n");
             return NULL;
     }
 
@@ -493,10 +493,10 @@ struct Value *divide(struct Value *left, struct Value *right)
             result->real /= right->integer;
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be for numerical operation (/)\n");
+            printf("Interpreter Error: Strings cannot be for numerical operation (/)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (/)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (/)\n");
             return NULL;
     }
     result->type = VREAL;
@@ -506,7 +506,7 @@ struct Value *divide(struct Value *left, struct Value *right)
 struct Value *srepeat(struct Value *left, struct Value *right)
 {   
     if (left->type != VSTRING) { 
-        printf("Runtime Error: Numbers cannot be used for string operation (**)\n");
+        printf("Interpreter Error: Numbers cannot be used for string operation (**)\n");
         return NULL;
     }
 
@@ -522,7 +522,7 @@ struct Value *srepeat(struct Value *left, struct Value *right)
             repeat = right->real-1;
             break;
         default:
-            printf("Runtime Error: Non-numeric value detected on right side of ** operator\n");
+            printf("Interpreter Error: Non-numeric value detected on right side of ** operator\n");
             return NULL;
     }
 
@@ -551,10 +551,10 @@ struct Value *exponent(struct Value *left, struct Value *right)
             result->type = VINT;
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (^)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (^)\n");
             break;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (^)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (^)\n");
             return NULL;
     }
 
@@ -596,10 +596,10 @@ struct Value *exponent(struct Value *left, struct Value *right)
             }
             break;
         case VSTRING:
-            printf("Runtime Error: Strings cannot be used for numerical operation (^)\n");
+            printf("Interpreter Error: Strings cannot be used for numerical operation (^)\n");
             return NULL;
         default:
-            printf("Runtime Error: Booleans cannot be used for numerical operation (^)\n");
+            printf("Interpreter Error: Booleans cannot be used for numerical operation (^)\n");
             return NULL;
     }
     return result;

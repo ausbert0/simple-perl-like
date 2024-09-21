@@ -8,36 +8,27 @@
 struct VariableList *head = NULL, *tail = NULL, *current = NULL;
 
 unsigned short int Interpret(struct ParseTree *parseTree) {
-    if (parseTree) {
-        if (evaluateStmtList(parseTree->stmtList)) {
-            printf("Successfully ran!\n"); 
-            return 1;
-        }
-        else {
-            printf("-------------------------------\nRuntime error(s) encountered\n");
-            return 0;
-        }
+    if (evaluateStmtList(parseTree->stmtList)) {
+        printf("-------------------------------\n");
+        printf("Program successfully run!\n");
+        printf("-------------------------------\n"); 
+        return 1;
     }
-    else { 
-        printf("-------------------------------\nInvalid Parse Tree, interpretation will not be done\n");
+    else {
+        printf("-------------------------------\n");
+        printf("Interpreter error(s) encountered\n");
+        printf("-------------------------------\n"); 
         return 0;
     }
 }
 
 unsigned short int evaluateStmtList(struct ParseStmtList *stmtList) {
-    printf("======================================================\n");
     for (int i = 0; i < stmtList->length; i++) {
-        if ((evaluateStmt(stmtList->stmtArr[i]))) {
-            // printf("\nStatement %d successfully interpreted!\n", i+1);
-            printf("-------------------------------------\n");
-        }
-        else 
+        if (!(evaluateStmt(stmtList->stmtArr[i])))
         {
-            // printf("\nStatement %d failed, runtime error detected :(\n", i+1);
             return 0;   
         }
     }
-    printf("======================================================\n");
     return 1;
 }
 
@@ -49,7 +40,7 @@ unsigned short int evaluateStmt(struct ParseStmt *stmt) {
             return 1;
         }
         else {
-            printf("Runtime Error: Invalid if statement\n");
+            printf("Interpreter Error: Invalid if statement\n");
             return 0;
         }
     }
@@ -59,7 +50,7 @@ unsigned short int evaluateStmt(struct ParseStmt *stmt) {
             return 1;
         }
         else {
-            printf("Runtime Error: Invalid assignment statement\n");
+            printf("Interpreter Error: Invalid assignment statement\n");
             return 0;
         }
     }
@@ -69,7 +60,7 @@ unsigned short int evaluateStmt(struct ParseStmt *stmt) {
             return 1;
         }
         else {
-            printf("Runtime Error: Invalid writeln statement\n");
+            printf("Interpreter Error: Invalid writeln statement\n");
             return 0;
         }
     }
@@ -79,25 +70,25 @@ unsigned short int evaluateStmt(struct ParseStmt *stmt) {
 unsigned short int evaluateIfStmt(struct ParseIfStmt *ifStmt) {
     struct Value *expr = evaluateExpr(ifStmt->condition);
     if (!expr) {
-        printf("Runtime Error: Invalid conditional expression in if-statement\n");
+        printf("Interpreter Error: Invalid conditional expression in if-statement\n");
         return 0;
     }
     
     if (expr->type != VBOOL) {
-        printf("Runtime Error: Non-conditional expression in if-statement\n");
+        printf("Interpreter Error: Non-conditional expression in if-statement\n");
         return 0;
     }
 
     if (expr->bool == 1) {
         if(!evaluateStmtList(ifStmt->ifClause)) {
-            printf("Runtime Error(s) detected in if-clause\n");
+            printf("Interpreter Error(s) detected in if-clause\n");
             return 0;
         }
         return 1;
     }
     else {
         if (!evaluateStmtList(ifStmt->elseClause)) {
-            printf("Runtime Error(s) detected in else-clause\n");
+            printf("Interpreter Error(s) detected in else-clause\n");
             return 0;
         }
         return 1;
@@ -109,9 +100,9 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
     struct Value *expression = evaluateExpr(assign->expr);
     if (!expression) {
         if (assign->var->variable[0] == '$')
-            printf("Runtime Error: Invalid expression to assign to numeric variable (%s)\n", assign->var->variable);
+            printf("Interpreter Error: Invalid expression to assign to numeric variable (%s)\n", assign->var->variable);
         if (assign->var->variable[0] == '@')
-            printf("Runtime Error: Invalid expression to assign to string variable (%s)\n", assign->var->variable);
+            printf("Interpreter Error: Invalid expression to assign to string variable (%s)\n", assign->var->variable);
         return 0;
     }
 
@@ -131,13 +122,13 @@ unsigned short int evaluateAssignStmt(struct ParseAssignStmt *assign) {
     *variableList = (struct VariableList) {NULL, assign->var->variable, expression};
 
     if (expression->type == VSTRING && (assign->var->variable[0] == '$')) {
-        printf("Runtime Error: Attempted to assign string (%s) to numeric variable (%s)\n"
+        printf("Interpreter Error: Attempted to assign string (%s) to numeric variable (%s)\n"
         , expression->string, assign->var->variable);
         return 0;
     }
 
     if (expression->type == VBOOL) {
-        printf("Runtime Error: Attempted to assign boolean value to variable (%s)\n"
+        printf("Interpreter Error: Attempted to assign boolean value to variable (%s)\n"
         , assign->var->variable);
         return 0;
     }
@@ -165,8 +156,6 @@ unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *writeLn) {
     if (!exprList) {
         return 0;
     }
-    
-    printf("\n_______________________________________________\n\n");
 
     short unsigned int length = writeLn->exprList->length;
     for (int i = 0; i < length; i++) {
@@ -177,7 +166,7 @@ unsigned short int evaluateWriteLnStmt(struct ParseWriteLnStmt *writeLn) {
             default: return 0;
         }
     }
-    printf("\n_______________________________________________\n\n");
+    printf("\n");
     return 1;
 }
 
@@ -241,60 +230,123 @@ struct Value *evaluateRelExpr(struct ParseRelExpr *relExpr) {
 }
 
 struct Value *evaluateAddExpr(struct ParseAddExpr *addExpr) {
-    if (!addExpr) {
-        return NULL;
-    }
-    struct Value *left = evaluateMultExpr(addExpr->left);
-    if (!left) {
-        return NULL;
-    }
-    
-    if (!addExpr->right) {
-        return left;
-    }
-    
-    struct Value *right = evaluateAddExpr(addExpr->right);
-    if (!right) {
-        return NULL;
-    }
+    struct ParseAddExpr *node = addExpr;
+    struct Value *next = NULL, *value = NULL;
+    enum Token operator = node->operator;
 
-    switch (addExpr->operator) {
-        case PLUS: return plus(left, right);
-        case MINUS: return minus(left, right);
-        case CAT: return cat(left, right);
-        default: return NULL;
-    } 
+    while (node) {
+        next = evaluateMultExpr(node->left);
+        if (!next) {
+            return NULL;
+        }
+
+        if (value == NULL) {
+            value = next;
+            node = node->right;
+            continue;
+        }
+
+        switch (operator) {
+            case PLUS: 
+                value = plus(value, next);
+                break;
+            case MINUS: 
+                value = minus(value, next);
+                break;
+            case CAT: 
+                value = cat(value, next);
+                break;
+            default: 
+                return NULL;
+        }
+        operator = node->operator;
+        node = node->right;    
+    }
+    return value;
+    
+    // if (!addExpr) {
+    //     return NULL;
+    // }
+    // struct Value *left = evaluateMultExpr(addExpr->left);
+    // if (!left) {
+    //     return NULL;
+    // }
+    
+    // if (!addExpr->right) {
+    //     return left;
+    // }
+    
+    // struct Value *right = evaluateAddExpr(addExpr->right);
+    // if (!right) {
+    //     return NULL;
+    // }
+
+    // switch (addExpr->operator) {
+    //     case PLUS: return plus(left, right);
+    //     case MINUS: return minus(left, right);
+    //     case CAT: return cat(left, right);
+    //     default: return NULL;
+    // } 
 }
 
 struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
-    if (!multExpr) {
-        return NULL;
-    }
-    struct Value *left = evaluateExponExpr(multExpr->left);
-    if (!left) {
-        return NULL;
-    }
-    
-    if (!multExpr->right) {
-        return left;
-    }
+    struct ParseMultExpr *node = multExpr;
+    struct Value *next = NULL, *value = NULL;
+    enum Token operator = node->operator;
 
-    struct Value *right = evaluateMultExpr(multExpr->right);
-    if (!right) {
-        return NULL;
-    }
-    
-    struct Value *right = evaluateMultExpr(multExpr->right);
-    if (!right) {
-        return NULL;
-    }
+    while (node) {
+        next = evaluateExponExpr(node->left);
+        if (!next) {
+            return NULL;
+        }
 
-    switch (multExpr->operator) {
-        case MULT: return mult(left, right);
-        case DIV: return divide(left, right);
-        case SREPEAT: return srepeat(left, right);
-        default: return NULL;
-    }    
+        if (value == NULL) {
+            value = next;
+            node = node->right;
+            continue;
+        }
+
+        switch (operator) {
+            case MULT: 
+                value = mult(value, next);
+                break;
+            case DIV: 
+                value = divide(value, next);
+                break;
+            case SREPEAT: 
+                value = srepeat(value, next);
+                break;
+            default: 
+                return NULL;
+        }
+        operator = node->operator;
+        node = node->right;    
+    }
+    return value;
+
+    // if (!multExpr) {
+    //     return NULL;
+    // }
+    // struct Value *left = evaluateExponExpr(multExpr->left);
+    // if (!left) {
+    //     return NULL;
+    // }
+    
+    // if (!multExpr->right) {
+    //     return left;
+    // }
+
+    // struct Value *right = evaluateMultExpr(multExpr->right);
+    // if (!right) {
+    //     return NULL;
+    // }
+
+    // switch (multExpr->operator) {
+    //     case MULT: return mult(left, right);
+    //     case DIV: return divide(left, right);
+    //     case SREPEAT: return srepeat(left, right);
+    //     default: return NULL;
+    // }    
 }
 
 struct Value *evaluateExponExpr(struct ParseExponExpr *exponExpr) {
@@ -349,7 +401,7 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
         case STRING:
             expr->type = VSTRING;
             if (sign != 0) {
-                printf("Runtime Error: + or - detected before string\n");
+                printf("Interpreter Error: + or - detected before string\n");
                 return NULL;
             }
             expr->string = primaryExpr->string;
@@ -377,11 +429,11 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
                 }
                 temp = temp->next;
             }
-            printf("Runtime Error: Attempted to use uninitialized variable (%s)\n", primaryExpr->ident);
+            printf("Interpreter Error: Attempted to use uninitialized variable (%s)\n", primaryExpr->ident);
             return NULL;        
         case SVAR:
             if (sign != 0) {
-                printf("Runtime Error: Signs are not allowed before string variables (%s)\n", primaryExpr->ident);
+                printf("Interpreter Error: Signs are not allowed before string variables (%s)\n", primaryExpr->ident);
                 return NULL;
             }
             while (temp) {
@@ -391,7 +443,7 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
                 }
                 temp = temp->next;
             }
-            printf("Runtime Error: Attempted to use uninitialized variable (%s)\n", primaryExpr->ident);
+            printf("Interpreter Error: Attempted to use uninitialized variable (%s)\n", primaryExpr->ident);
         default:
             return NULL;
     }

@@ -45,10 +45,12 @@ struct ParseTree *Prog(FILE* input, int* line)
     if (stmtList && (GetNextToken(input, line))->token == DONE)
     {
         *parser = (struct ParseTree) {stmtList};
-        printf("(DONE)\n");
         return parser;
     }
-    ParseError(line, "Missing Program");
+        printf("-------------------------------\n");
+        printf("Parsing error(s) encountered\n");
+        printf("-------------------------------\n"); 
+        return 0;
     return NULL;
 }
 
