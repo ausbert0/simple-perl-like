@@ -28,17 +28,6 @@ int main(int argc, char *argv[])
             return 1;           
     }
 
-    // parser testing
-    struct ParseTree *yeet = Prog(file, &lineNumber);
-    if (!yeet)
-        return 0;
-
-    // interpreter testing
-    if(Interpret(yeet))
-        return 1;
-    return 0;
-
-    
     // // lexical analyzer testing loop
     // struct tokMap tokenMap[] = 
     // {
@@ -80,7 +69,17 @@ int main(int argc, char *argv[])
     // {
     //     printf("%s(%s) %d\n", tokenMap[lex->token].s, lex->lexeme, lex->line);
     // }
-    // printf("----------------------------------------\n");
     // return 1;
+
+    // parser testing
+    struct ParseTree *yeet = Prog(file, &lineNumber);
+    if (!yeet)
+        return 0;
+
+    // interpreter testing
+    if(Interpret(yeet))
+        return 1;
+    else 
+        return 0;
 
 }

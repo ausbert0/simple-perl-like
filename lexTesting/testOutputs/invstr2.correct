@@ -1,2 +1,2 @@
-SCONST(Please type the "coordinates" of three points)
-Error in line 4 ('The center of the circle through these points is )
+SCONST(Please type the "coordinates" of three points) 1
+Lexer Error: Missing Closing ' at Line 4 ('The center of the circle through these points is )

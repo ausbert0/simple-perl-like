@@ -1,4 +1,6 @@
-1. Line # 11: Missing semicolon at end of Statement.
-2. Line # 11: Missing Program
-Unsuccessful Parsing
-Number of Syntax Errors 2
+Parser Error 1) Line # 11: Missing comma in writeln expression list
+Parser Error 2) Line # 11: Invalid expression list
+Parser Error 3) Line # 11: Incorrect writeln Statement
+-------------------------------
+Parsing error(s) encountered
+-------------------------------

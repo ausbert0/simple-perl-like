@@ -81,7 +81,7 @@ struct ParseStmtList *StmtList(FILE* input, int* line)
         }
         if (lex->token == ELSE)
         {
-            ParseError(line, "Missing right brace");
+            ParseError(line, "Missing right brace of If-Statement");
             return NULL;
         }
         if (lex->token != SEMICOL)
@@ -91,7 +91,6 @@ struct ParseStmtList *StmtList(FILE* input, int* line)
         }
     }
     stmtArr[index] = NULL;
-    ParseError(line, "Syntactic error in program body");
     return NULL;
 }
 
@@ -107,7 +106,7 @@ struct ParseStmt *Stmt(FILE* input, int* line)
             struct ParseIfStmt *ifStmt = IfStmt(input, line);
             if (!ifStmt)
             {
-                ParseError(line, "Incorrect if-statement");
+                ParseError(line, "Incorrect If-Statement");
                 return NULL;
             }
             stmt->type = IFSTMT;
@@ -140,7 +139,7 @@ struct ParseStmt *Stmt(FILE* input, int* line)
             return stmt;
         }
         case IDENT:
-            ParseError(line, "Unrecognized identifier");
+            ParseError(line, "Invalid variable name");
             return NULL;   
         default:
             PushBackToken(lex); 

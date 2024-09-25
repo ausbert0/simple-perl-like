@@ -219,6 +219,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 lexeme[length++] = current;
                 if (current == '.')
                 {
+                    lexeme[length] = '\0';
                     printf("Lexer Error: Extra . at Line %d (%s)\n", *line, lexeme);
                     *lexP = (struct LexItem) {lexeme, *line, ERR};
                     return lexP;
@@ -240,6 +241,7 @@ struct LexItem* getNextToken(FILE* input, int* line)
                 }
                 if (current == '\n' || current == EOF)
                 {
+                    lexeme[length] = '\0';
                     printf("Lexer Error: Missing Closing \' at Line %d (%s)\n", *line, lexeme);
                     *lexP = (struct LexItem) {strtok(lexeme, "\'"), *line, ERR};
                     return lexP;

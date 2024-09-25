@@ -1,6 +1,5 @@
-1. Line # 12: Missing Left Parenthesis of Writeln Statement
-2. Line # 12: Incorrect Writeln Statement.
-3. Line # 12: Syntactic error in Program Body.
-4. Line # 12: Missing Program
-Unsuccessful Parsing
-Number of Syntax Errors 4
+Parser Error 1) Line # 12: Missing left parenthesis of writeln statement
+Parser Error 2) Line # 12: Incorrect writeln Statement
+-------------------------------
+Parsing error(s) encountered
+-------------------------------

@@ -1,32 +1,32 @@
-IDENT(float)
-IDENT(x1)
-COMMA
-IDENT(y1)
-COMMA
-IDENT(x2)
-COMMA
-IDENT(y2)
-COMMA
-ICONST(2)
-IDENT(x3)
-COMMA
-IDENT(y3)
-MULT
-IDENT(w)
-COMMA
-IDENT(_a)
-COMMA
-MINUS
-IDENT(b)
-COMMA
-IDENT(r)
-SEMICOL
-IDENT(string)
-SIDENT(@str___1)
-COMMA
-NIDENT($str)
-NIDENT($_2)
-SEMICOL
-IDENT(int)
-IDENT(x)
-Error in line 3 (&)
+IDENT(float) 1
+IDENT(x1) 1
+COMMA(,) 1
+IDENT(y1) 1
+COMMA(,) 1
+IDENT(x2) 1
+COMMA(,) 1
+IDENT(y2) 1
+COMMA(,) 1
+ICONST(2) 1
+IDENT(x3) 1
+COMMA(,) 1
+IDENT(y3) 1
+MULT(*) 1
+IDENT(w) 1
+COMMA(,) 1
+IDENT(_a) 1
+COMMA(,) 1
+MINUS(-) 1
+IDENT(b) 1
+COMMA(,) 1
+IDENT(r) 1
+SEMICOL(;) 1
+IDENT(string) 2
+SIDENT(@str___1) 2
+COMMA(,) 2
+NIDENT($str) 2
+NIDENT($_2) 2
+SEMICOL(;) 2
+IDENT(int) 3
+IDENT(x) 3
+Lexer Error: Unrecognized Token in Line 3 (&)

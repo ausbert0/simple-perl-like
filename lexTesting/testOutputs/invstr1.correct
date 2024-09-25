@@ -1,11 +1,11 @@
-SCONST(Please type the "coordinates" of three points)
-IDENT(The)
-IDENT(center)
-IDENT(of)
-IDENT(the)
-IDENT(circle)
-IDENT(through)
-IDENT(these)
-IDENT(points)
-IDENT(is)
-Error in line 6 ('Its radius is 25 cm")
+SCONST(Please type the "coordinates" of three points) 1
+IDENT(The) 4
+IDENT(center) 4
+IDENT(of) 4
+IDENT(the) 4
+IDENT(circle) 4
+IDENT(through) 4
+IDENT(these) 4
+IDENT(points) 4
+IDENT(is) 4
+Lexer Error: Missing Closing ' at Line 6 ('Its radius is 25 cm")

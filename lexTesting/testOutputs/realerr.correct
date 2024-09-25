@@ -1,5 +1,5 @@
-RCONST(23.5)
-RCONST(15.)
-RCONST(0.75)
-RCONST(0.8)
-Error in line 2 (27.57.)
+RCONST(23.5) 1
+ICONST(15) 1
+RCONST(0.75) 1
+RCONST(0.8) 2
+Lexer Error: Extra . at Line 2 (27.57.)

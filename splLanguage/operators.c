@@ -129,7 +129,6 @@ struct Value *slthan(struct Value *left, struct Value *right)
 
 struct Value *sgthan(struct Value *left, struct Value *right)
 {
-    // char *operand1 = NULL, *operand2 = NULL;
     char operand1[128], operand2[128];
     switch (left->type)
     {
@@ -335,7 +334,7 @@ struct Value *minus(struct Value *left, struct Value *right)
             if (result->type == VREAL)
                 result->real -= right->real;
             else
-                result->real = result->integer + right->real;
+                result->real = result->integer - right->real;
             result->type = VREAL; 
             break;
         case VINT:
@@ -518,7 +517,7 @@ struct Value *srepeat(struct Value *left, struct Value *right)
             repeat = right->integer-1;
             break;
         case VREAL:
-            printf("Warning: Real value used for string repeat will be truncated\n");
+            printf("WARNING: Real value used for string repeat will be truncated\n");
             repeat = right->real-1;
             break;
         default:

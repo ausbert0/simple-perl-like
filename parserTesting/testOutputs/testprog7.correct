@@ -1,7 +1,6 @@
-1. Line # 7: Missing right brace.
-2. Line # 7: Missing Statement for If-Stmt Clause
-3. Line # 7: Incorrect If-Statement.
-4. Line # 7: Syntactic error in Program Body.
-5. Line # 7: Missing Program
-Unsuccessful Parsing
-Number of Syntax Errors 5
+Parser Error 1) Line # 7: Missing right brace of If-Statement
+Parser Error 2) Line # 7: Invalid statement list in If-Clause
+Parser Error 3) Line # 7: Incorrect If-Statement
+-------------------------------
+Parsing error(s) encountered
+-------------------------------

@@ -263,30 +263,6 @@ struct Value *evaluateAddExpr(struct ParseAddExpr *addExpr) {
         node = node->right;    
     }
     return value;
-    
-    // if (!addExpr) {
-    //     return NULL;
-    // }
-    // struct Value *left = evaluateMultExpr(addExpr->left);
-    // if (!left) {
-    //     return NULL;
-    // }
-    
-    // if (!addExpr->right) {
-    //     return left;
-    // }
-    
-    // struct Value *right = evaluateAddExpr(addExpr->right);
-    // if (!right) {
-    //     return NULL;
-    // }
-
-    // switch (addExpr->operator) {
-    //     case PLUS: return plus(left, right);
-    //     case MINUS: return minus(left, right);
-    //     case CAT: return cat(left, right);
-    //     default: return NULL;
-    // } 
 }
 
 struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
@@ -323,30 +299,6 @@ struct Value *evaluateMultExpr(struct ParseMultExpr *multExpr) {
         node = node->right;    
     }
     return value;
-
-    // if (!multExpr) {
-    //     return NULL;
-    // }
-    // struct Value *left = evaluateExponExpr(multExpr->left);
-    // if (!left) {
-    //     return NULL;
-    // }
-    
-    // if (!multExpr->right) {
-    //     return left;
-    // }
-
-    // struct Value *right = evaluateMultExpr(multExpr->right);
-    // if (!right) {
-    //     return NULL;
-    // }
-
-    // switch (multExpr->operator) {
-    //     case MULT: return mult(left, right);
-    //     case DIV: return divide(left, right);
-    //     case SREPEAT: return srepeat(left, right);
-    //     default: return NULL;
-    // }    
 }
 
 struct Value *evaluateExponExpr(struct ParseExponExpr *exponExpr) {
@@ -418,13 +370,17 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
         case NVAR: 
             while (temp) {
                 if (strncmp(primaryExpr->ident, temp->variable, 128) == 0) {
-                    expr = temp->value;
-                    if (sign == 0)
-                        return expr;
-                    if (expr->type == VINT)
-                        expr->integer *= sign;
-                    else if (expr->type == VREAL)
-                        expr->real *= sign;
+                    expr->type = temp->value->type;
+                    if (expr->type == VREAL) {
+                        expr->real = temp->value->real;
+                        if (sign != 0) 
+                            expr->real *= sign;
+                    }
+                    else {
+                        expr->integer = temp->value->integer;
+                        if (sign != 0) 
+                            expr->integer *= sign;
+                    }
                     return expr;
                 }
                 temp = temp->next;
@@ -449,4 +405,3 @@ struct Value *evaluatePrimaryExpr(struct ParsePrimaryExpr *primaryExpr, short in
     }
     return expr;
 }
-

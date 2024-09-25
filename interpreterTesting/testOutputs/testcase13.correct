@@ -1,4 +1,4 @@
-Warning: Real value used for string repeat will be truncated
+WARNING: Real value used for string repeat will be truncated
 0.500000 50 Welcome!Welcome!Welcome! Hello Welcome!Welcome!Welcome!
 -------------------------------
 Program successfully run!
